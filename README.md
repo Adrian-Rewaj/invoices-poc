@@ -3,7 +3,7 @@
 Modern invoice system built as a monorepo with four JavaScript applications:
 - **web-app** (Next.js) - Main application with user interface
 - **invoice-worker** (Nest.js) - Worker for generating PDF invoices
-- **email-worker** (Express.js) - Worker for sending emails
+- **email-worker** (Nest.js) - Worker for sending emails
 - **pay-mock** (Express.js) - Mock application for payment simulation
 
 ![Application Dashboard](assets/screen.png)
@@ -183,7 +183,7 @@ npm run docker:logs
 ### Applications
 - **web-app** (port 3001): Next.js with TypeScript, Tailwind CSS, Prisma
 - **invoice-worker**: Nest.js worker for PDF generation with pdfkit
-- **email-worker**: Express.js worker for sending emails with nodemailer
+- **email-worker**: Nest.js worker for sending emails with nodemailer
 - **pay-mock** (port 3003): Express.js payment mock with webhook
 
 ## 🔄 Application Flow
