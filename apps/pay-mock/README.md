@@ -1,42 +1,42 @@
-# Pay Mock - Symulator Płatności
+# Pay Mock - Payment Simulator
 
-Prosta aplikacja Express.js symulująca system płatności dla faktur.
+Simple Express.js application simulating payment system for invoices.
 
-![Strona płatności](../../assets/screen.png)
+![Payment Page](../../assets/screen.png)
 
-## 🚀 Opis
+## 🚀 Description
 
-Pay Mock to aplikacja, która:
-- Wyświetla stronę płatności dla faktur po tokenie
-- Pozwala na symulację płatności z formularzem
-- Wysyła webhook do głównej aplikacji po "płatności"
-- Weryfikuje podpis webhook dla bezpieczeństwa
-- Aktualizuje status faktury na "paid"
+Pay Mock is an application that:
+- Displays payment page for invoices by token
+- Allows payment simulation with form
+- Sends webhook to main application after "payment"
+- Verifies webhook signature for security
+- Updates invoice status to "paid"
 
-## 🛠️ Technologie
+## 🛠️ Technologies
 
-- **Express.js** - Framework Node.js
+- **Express.js** - Node.js framework
 - **node-fetch** - HTTP requests
 - **CORS** - Cross-origin requests
 
-## 🚀 Uruchomienie
+## 🚀 Setup
 
 ```bash
-# Instalacja zależności
+# Install dependencies
 npm install
 
-# Uruchomienie w trybie deweloperskim
+# Start in development mode
 npm run dev
 
-# Uruchomienie produkcyjne
+# Production start
 npm start
 ```
 
-Aplikacja będzie dostępna na `http://localhost:3003`
+Application will be available at `http://localhost:3003`
 
-## 🔧 Konfiguracja
+## 🔧 Configuration
 
-### Zmienne środowiskowe (.env)
+### Environment variables (.env)
 ```env
 # API Configuration
 API_URL="http://localhost:3001/api"
@@ -45,99 +45,99 @@ API_URL="http://localhost:3001/api"
 PORT=3003
 ```
 
-### Opis zmiennych
-- **API_URL** - URL do API głównej aplikacji (web-app)
-- **PORT** - Port na którym uruchamia się aplikacja (domyślnie 3003)
+### Variable descriptions
+- **API_URL** - URL to main application API (web-app)
+- **PORT** - Port on which application starts (default 3003)
 
-## 📁 Struktura projektu
+## 📁 Project Structure
 
 ```
 pay-mock/
-├── index.js              # Główna aplikacja Express
-├── package.json          # Zależności
-├── .env                  # Zmienne środowiskowe
-├── .env.example          # Przykład konfiguracji
-├── .gitignore           # Ignorowane pliki
-└── README.md           # Dokumentacja
+├── index.js              # Main Express application
+├── package.json          # Dependencies
+├── .env                  # Environment variables
+├── .env.example          # Configuration example
+├── .gitignore           # Ignored files
+└── README.md           # Documentation
 ```
 
 ## 🔄 API Endpoints
 
-### Płatności
-- `GET /pay/:token` - Strona płatności dla faktury z danym tokenem
+### Payments
+- `GET /pay/:token` - Payment page for invoice with given token
 
-### Przykład użycia
+### Usage example
 ```
 http://localhost:3003/pay/abc123def456
 ```
 
-## 📄 Strona płatności
+## 📄 Payment Page
 
-### Funkcjonalności
-- **Wyświetlanie faktury**: Dane faktury i klienta
-- **Symulacja płatności**: Przycisk "Zapłać teraz"
-- **Webhook**: Automatyczne wysłanie po płatności
+### Features
+- **Invoice display**: Invoice and client data
+- **Payment simulation**: "Pay now" button
+- **Webhook**: Automatic sending after payment
 
-### Przykład strony
+### Page example
 ```html
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Płatność - Faktura INV-2024-001</title>
+    <title>Payment - Invoice INV-2024-001</title>
 </head>
 <body>
-    <h1>Płatność faktury</h1>
+    <h1>Invoice Payment</h1>
     <div class="invoice-details">
-        <h2>Faktura INV-2024-001</h2>
-        <p>Klient: Jan Kowalski</p>
-        <p>Kwota: 369,00 zł</p>
-        <p>Termin: 2024-02-15</p>
+        <h2>Invoice INV-2024-001</h2>
+        <p>Client: Jan Kowalski</p>
+        <p>Amount: 369,00 zł</p>
+        <p>Due date: 2024-02-15</p>
     </div>
     
-    <button id="payBtn">Zapłać teraz</button>
+    <button id="payBtn">Pay now</button>
 </body>
 </html>
 ```
 
-## 🔗 Integracje
+## 🔗 Integrations
 
 ### Webhook
 - **URL**: `${API_URL}/payments/webhook`
 - **Method**: POST
-- **Headers**: `X-PAYMENT-SIGNATURE` z podpisem
-- **Body**: Dane płatności w JSON
+- **Headers**: `X-PAYMENT-SIGNATURE` with signature
+- **Body**: Payment data in JSON
 
 ### API
-- **Pobieranie faktury**: `${API_URL}/invoices/by-token/:token`
+- **Get invoice**: `${API_URL}/invoices/by-token/:token`
 - **Webhook**: `${API_URL}/payments/webhook`
 
-## 🔐 Bezpieczeństwo
+## 🔐 Security
 
-- **Token Validation**: Sprawdzanie poprawności tokenu płatności
-- **Webhook Signature**: Podpisywanie webhooków
-- **CORS**: Poprawnie skonfigurowane nagłówki CORS
-- **Error Handling**: Obsługa błędów i wyjątków
+- **Token Validation**: Checking payment token validity
+- **Webhook Signature**: Signing webhooks
+- **CORS**: Properly configured CORS headers
+- **Error Handling**: Error and exception handling
 
-## 📊 Flow płatności
+## 📊 Payment Flow
 
-1. **Odbieranie tokenu**: Użytkownik wchodzi na `/pay/:token`
-2. **Pobieranie faktury**: Aplikacja pobiera dane faktury z API
-3. **Wyświetlanie strony**: Pokazuje dane faktury i przycisk płatności
-4. **Symulacja płatności**: Kliknięcie "Zapłać teraz"
-5. **Wysłanie webhook**: POST do web-app z podpisem
-6. **Aktualizacja statusu**: Web-app zmienia status na "paid"
+1. **Token reception**: User enters `/pay/:token`
+2. **Invoice retrieval**: Application fetches invoice data from API
+3. **Page display**: Shows invoice data and payment button
+4. **Payment simulation**: Clicking "Pay now"
+5. **Webhook sending**: POST to web-app with signature
+6. **Status update**: Web-app changes status to "paid"
 
-## 📞 Wsparcie
+## 📞 Support
 
-W przypadku problemów:
-1. Sprawdź logi: `npm run dev`
-2. Sprawdź API_URL: `echo $API_URL`
-3. Sprawdź webhook: `curl -X POST ${API_URL}/payments/webhook`
-4. Sprawdź CORS: Browser Developer Tools
+In case of issues:
+1. Check logs: `npm run dev`
+2. Check API_URL: `echo $API_URL`
+3. Check webhook: `curl -X POST ${API_URL}/payments/webhook`
+4. Check CORS: Browser Developer Tools
 
-## 🔧 Debugowanie
+## 🔧 Debugging
 
-### Sprawdzenie webhook
+### Webhook check
 ```bash
 curl -X POST http://localhost:3001/api/payments/webhook \
   -H "Content-Type: application/json" \
@@ -145,14 +145,14 @@ curl -X POST http://localhost:3001/api/payments/webhook \
   -d '{"invoiceId": 1, "status": "paid"}'
 ```
 
-### Sprawdzenie API
+### API check
 ```bash
 curl http://localhost:3001/api/invoices/by-token/abc123
 ```
 
-### Sprawdzenie CORS
+### CORS check
 ```javascript
-// W konsoli przeglądarki
+// In browser console
 fetch('http://localhost:3001/api/invoices/by-token/abc123')
   .then(response => response.json())
   .then(data => console.log(data));

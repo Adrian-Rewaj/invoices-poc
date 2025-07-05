@@ -1,79 +1,79 @@
-# Web App - System Faktur
+# Web App - Invoice System
 
-Główna aplikacja Next.js systemu faktur z interfejsem użytkownika.
+Main Next.js application of the invoice system with user interface.
 
-![Dashboard aplikacji](../../assets/screen.png)
+![Application Dashboard](../../assets/screen.png)
 
-## 🚀 Opis
+## 🚀 Description
 
-Web App to główna aplikacja systemu faktur, która zapewnia:
-- **Dashboard** z listą klientów i faktur
-- **Autentykację JWT** z bezpiecznym logowaniem
-- **Zarządzanie klientami** z historią zmian
-- **Tworzenie faktur** z modalnym edytorem pozycji
-- **Pobieranie PDF** wygenerowanych faktur
-- **API endpoints** dla innych aplikacji w systemie
+Web App is the main application of the invoice system that provides:
+- **Dashboard** with list of clients and invoices
+- **JWT Authentication** with secure login
+- **Client Management** with change history
+- **Invoice Creation** with modal item editor
+- **PDF Download** of generated invoices
+- **API endpoints** for other applications in the system
 
-## 🛠️ Technologie
+## 🛠️ Technologies
 
-- **Next.js 14** z App Router
-- **TypeScript** dla type safety
-- **Tailwind CSS** dla stylowania
-- **Prisma ORM** dla bazy danych
-- **JWT** dla autentykacji
-- **RabbitMQ** dla komunikacji z workerami
-- **Jest** dla testów jednostkowych
-- **Playwright** dla testów E2E
+- **Next.js 14** with App Router
+- **TypeScript** for type safety
+- **Tailwind CSS** for styling
+- **Prisma ORM** for database
+- **JWT** for authentication
+- **RabbitMQ** for communication with workers
+- **Jest** for unit tests
+- **Playwright** for E2E tests
 
-## 🚀 Uruchomienie
+## 🚀 Setup
 
 ```bash
-# Instalacja zależności
+# Install dependencies
 npm install
 
-# Uruchomienie w trybie deweloperskim
+# Start in development mode
 npm run dev
 
-# Build produkcyjny
+# Production build
 npm run build
 
-# Uruchomienie produkcyjne
+# Production start
 npm start
 ```
 
-Aplikacja będzie dostępna na `http://localhost:3001`
+Application will be available at `http://localhost:3001`
 
-## 🧪 Testy
+## 🧪 Testing
 
 ```bash
-# Testy jednostkowe
+# Unit tests
 npm test
 
-# Testy w trybie watch
+# Tests in watch mode
 npm run test:watch
 
-# Testy z coverage
+# Tests with coverage
 npm run test:coverage
 
-# Testy E2E
+# E2E tests
 npm run test:e2e
 
-# Testy E2E z UI
+# E2E tests with UI
 npm run test:e2e:ui
 ```
 
-### Rodzaje testów
-- **Unit Tests**: Testy funkcji i komponentów (`__tests__/unit/`)
-- **Integration Tests**: Testy API endpoints (`__tests__/integration/`)
-- **E2E Tests**: Testy całego flow aplikacji (`tests/e2e/`)
+### Test types
+- **Unit Tests**: Function and component tests (`__tests__/unit/`)
+- **Integration Tests**: API endpoint tests (`__tests__/integration/`)
+- **E2E Tests**: Full application flow tests (`tests/e2e/`)
 
-Więcej informacji: [TESTING.md](./TESTING.md)
+More information: [TESTING.md](./TESTING.md)
 
-## 🔧 Konfiguracja
+## 🔧 Configuration
 
-### Zmienne środowiskowe (.env)
+### Environment variables (.env)
 ```env
-# Baza danych
+# Database
 DATABASE_URL="postgresql://invoices_user:invoices_password@localhost:5433/invoices_db"
 
 # JWT
@@ -89,117 +89,117 @@ PAYMENT_SIGNATURE="sekretnasygnatura"
 PDF_STORAGE_PATH="/var/www/html/development/invoices-poc/storage/pdfs"
 ```
 
-## 📁 Struktura projektu
+## 📁 Project Structure
 
 ```
 web-app/
 ├── app/                    # App Router (Next.js 14)
 │   ├── api/               # API routes
-│   │   ├── auth/          # Autentykacja
-│   │   ├── clients/       # Zarządzanie klientami
-│   │   ├── invoices/      # Zarządzanie fakturami
-│   │   └── payments/      # Webhook płatności
-│   ├── dashboard/         # Strona główna
-│   ├── login/            # Strona logowania
-│   ├── globals.css       # Style globalne
-│   ├── layout.tsx        # Główny layout
-│   ├── page.tsx          # Strona główna z przekierowaniem
-│   └── favicon.ico       # Ikona aplikacji
-├── lib/                   # Biblioteki
-│   ├── auth.ts           # Autentykacja JWT
-│   ├── cors.ts           # Konfiguracja CORS
-│   ├── invoice.ts        # Logika faktur
-│   ├── prisma.ts         # Klient Prisma
-│   └── rabbitmq.ts       # Komunikacja RabbitMQ
-├── prisma/               # Schema bazy danych
-│   └── schema.prisma     # Model danych
-├── components/           # Komponenty React
-├── __tests__/           # Testy jednostkowe i integracyjne
-│   ├── unit/            # Testy jednostkowe
-│   └── integration/     # Testy integracyjne
-├── tests/               # Testy E2E
+│   │   ├── auth/          # Authentication
+│   │   ├── clients/       # Client management
+│   │   ├── invoices/      # Invoice management
+│   │   └── payments/      # Payment webhook
+│   ├── dashboard/         # Main page
+│   ├── login/            # Login page
+│   ├── globals.css       # Global styles
+│   ├── layout.tsx        # Main layout
+│   ├── page.tsx          # Main page with redirect
+│   └── favicon.ico       # Application icon
+├── lib/                   # Libraries
+│   ├── auth.ts           # JWT authentication
+│   ├── cors.ts           # CORS configuration
+│   ├── invoice.ts        # Invoice logic
+│   ├── prisma.ts         # Prisma client
+│   └── rabbitmq.ts       # RabbitMQ communication
+├── prisma/               # Database schema
+│   └── schema.prisma     # Data model
+├── components/           # React components
+├── __tests__/           # Unit and integration tests
+│   ├── unit/            # Unit tests
+│   └── integration/     # Integration tests
+├── tests/               # E2E tests
 │   └── e2e/            # Playwright tests
-├── public/              # Pliki statyczne
-└── jest.config.js       # Konfiguracja Jest
+├── public/              # Static files
+└── jest.config.js       # Jest configuration
 ```
 
 ## 🔄 API Endpoints
 
-### Autentykacja
-- `POST /api/auth/login` - Logowanie użytkownika
+### Authentication
+- `POST /api/auth/login` - User login
 
-### Klienci
-- `GET /api/clients` - Lista klientów
-- `POST /api/clients` - Dodanie nowego klienta
-- `PUT /api/clients/[id]` - Edycja klienta z historią
+### Clients
+- `GET /api/clients` - Client list
+- `POST /api/clients` - Add new client
+- `PUT /api/clients/[id]` - Edit client with history
 
-### Faktury
-- `GET /api/invoices` - Lista faktur
-- `POST /api/invoices` - Utworzenie nowej faktury
-- `GET /api/invoices/[id]/pdf` - Pobieranie PDF
-- `GET /api/invoices/by-token/[token]` - Faktura po tokenie
+### Invoices
+- `GET /api/invoices` - Invoice list
+- `POST /api/invoices` - Create new invoice
+- `GET /api/invoices/[id]/pdf` - Download PDF
+- `GET /api/invoices/by-token/[token]` - Invoice by token
 
-### Płatności
-- `POST /api/payments/webhook` - Webhook z weryfikacją podpisu
+### Payments
+- `POST /api/payments/webhook` - Webhook with signature verification
 
-## 🔐 Bezpieczeństwo
+## 🔐 Security
 
-- **JWT**: Tokeny z 24h expiration
-- **bcrypt**: Hasła hashowane z salt rounds 10
-- **CORS**: Poprawnie skonfigurowane nagłówki
-- **Webhook signature**: Weryfikacja podpisu płatności
-- **Prisma**: Zabezpieczenia przed SQL injection
+- **JWT**: Tokens with 24h expiration
+- **bcrypt**: Passwords hashed with salt rounds 10
+- **CORS**: Properly configured headers
+- **Webhook signature**: Payment signature verification
+- **Prisma**: Protection against SQL injection
 
-## 📊 Funkcjonalności
+## 📊 Features
 
 ### Dashboard
-- Lista klientów z możliwością dodawania/edycji
-- Lista faktur z statusami (draft, sent, paid)
-- Pobieranie PDF faktur
-- Podgląd szczegółów faktury
+- Client list with add/edit capabilities
+- Invoice list with statuses (draft, sent, paid)
+- PDF invoice download
+- Invoice details preview
 
-### Zarządzanie klientami
-- Dodawanie nowych klientów
-- Edycja danych klientów
-- Historia zmian z timestampami
-- Walidacja danych
+### Client Management
+- Adding new clients
+- Editing client data
+- Change history with timestamps
+- Data validation
 
-### Tworzenie faktur
-- Modalny edytor pozycji faktury
-- Automatyczne obliczanie kwot
-- Walidacja danych
-- Publikowanie eventów do RabbitMQ
+### Invoice Creation
+- Modal invoice item editor
+- Automatic amount calculations
+- Data validation
+- Publishing events to RabbitMQ
 
-### Statusy faktur
-- **draft** (żółty): Faktura utworzona
-- **sent** (niebieski): PDF wygenerowany, email wysłany
-- **paid** (zielony): Płatność zrealizowana
+### Invoice Statuses
+- **draft** (yellow): Invoice created
+- **sent** (blue): PDF generated, email sent
+- **paid** (green): Payment completed
 
-## 🔗 Integracje
+## 🔗 Integrations
 
-- **invoice-worker**: Odbiera eventy `invoice.created`
-- **email-worker**: Dostarcza dane faktur przez API
-- **pay-mock**: Odbiera webhook płatności
-- **RabbitMQ**: Komunikacja event-driven
-- **PostgreSQL**: Baza danych z Prisma ORM
+- **invoice-worker**: Receives `invoice.created` events
+- **email-worker**: Provides invoice data through API
+- **pay-mock**: Receives payment webhooks
+- **RabbitMQ**: Event-driven communication
+- **PostgreSQL**: Database with Prisma ORM
 
 ## 🐳 Docker
 
-Aplikacja może być uruchomiona w kontenerze Docker:
+Application can be run in Docker container:
 
 ```bash
 # Build
 docker build -t web-app .
 
-# Uruchomienie
+# Run
 docker run -p 3001:3001 web-app
 ```
 
-## 📞 Wsparcie
+## 📞 Support
 
-W przypadku problemów:
-1. Sprawdź logi: `npm run dev`
-2. Sprawdź bazy danych: `npx prisma studio`
-3. Sprawdź RabbitMQ: http://localhost:15672
-4. Sprawdź testy: `npm test`
+In case of issues:
+1. Check logs: `npm run dev`
+2. Check database: `npx prisma studio`
+3. Check RabbitMQ: http://localhost:15672
+4. Check tests: `npm test`
 5. Reset: `npm run clean && npm install`

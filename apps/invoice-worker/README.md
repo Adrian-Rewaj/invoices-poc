@@ -1,46 +1,46 @@
-# Invoice Worker - Generator PDF Faktur
+# Invoice Worker - PDF Invoice Generator
 
-Worker Nest.js do automatycznego generowania PDF faktur z polskimi znakami.
+Nest.js worker for automatically generating PDF invoices with Polish characters.
 
-## 🚀 Opis
+## 🚀 Description
 
-Invoice Worker to aplikacja Nest.js, która:
-- Nasłuchuje eventów `invoice.created` z RabbitMQ
-- Generuje PDF faktury z polskimi znakami (DejaVu Sans)
-- Zapisuje PDF w storage/pdfs/
-- Aktualizuje bazę danych z nazwą wygenerowanego pliku
-- Publikuje event `invoice.send` z nazwą PDF
+Invoice Worker is a Nest.js application that:
+- Listens to `invoice.created` events from RabbitMQ
+- Generates PDF invoice with Polish characters (DejaVu Sans)
+- Saves PDF in storage/pdfs/
+- Updates database with generated file name
+- Publishes `invoice.send` event with PDF name
 
-## 🛠️ Technologie
+## 🛠️ Technologies
 
-- **Nest.js** - Framework Node.js
+- **Nest.js** - Node.js framework
 - **TypeScript** - Type safety
-- **pdfkit** - Generowanie PDF
-- **RabbitMQ** - Komunikacja event-driven
-- **Prisma** - ORM dla bazy danych
-- **Worker Threads** - Asynchroniczne generowanie PDF
+- **pdfkit** - PDF generation
+- **RabbitMQ** - Event-driven communication
+- **Prisma** - ORM for database
+- **Worker Threads** - Asynchronous PDF generation
 
-## 🚀 Uruchomienie
+## 🚀 Setup
 
 ```bash
-# Instalacja zależności
+# Install dependencies
 npm install
 
-# Uruchomienie w trybie deweloperskim
+# Start in development mode
 npm run start:dev
 
-# Uruchomienie produkcyjne
+# Production start
 npm run start:prod
 
 # Build
 npm run build
 ```
 
-## 🔧 Konfiguracja
+## 🔧 Configuration
 
-### Zmienne środowiskowe (.env)
+### Environment variables (.env)
 ```env
-# Baza danych
+# Database
 DATABASE_URL="postgresql://invoices_user:invoices_password@localhost:5433/invoices_db"
 
 # RabbitMQ
@@ -49,113 +49,113 @@ RABBITMQ_URL="amqp://invoices_user:invoices_password@localhost:5672"
 # PDF Storage
 PDF_STORAGE_PATH="/var/www/html/development/invoices-poc/storage/pdfs"
 
-# Fonty
+# Fonts
 FONT_PATH="/var/www/html/development/invoices-poc/assets/fonts/DejaVuSans.ttf"
 ```
 
-## 📁 Struktura projektu
+## 📁 Project Structure
 
 ```
 invoice-worker/
 ├── src/
-│   ├── app.module.ts      # Główny moduł aplikacji
+│   ├── app.module.ts      # Main application module
 │   ├── main.ts           # Entry point
-│   ├── invoice/          # Moduł faktur
+│   ├── invoice/          # Invoice module
 │   │   ├── invoice.controller.ts
 │   │   ├── invoice.service.ts
 │   │   └── invoice.module.ts
-│   ├── pdf/              # Moduł PDF
+│   ├── pdf/              # PDF module
 │   │   ├── pdf.service.ts
 │   │   └── pdf.module.ts
-│   └── rabbitmq/         # Konfiguracja RabbitMQ
+│   └── rabbitmq/         # RabbitMQ configuration
 │       └── rabbitmq.module.ts
-├── prisma/               # Schema bazy danych
+├── prisma/               # Database schema
 │   └── schema.prisma
 └── package.json
 ```
 
-## 🔄 Flow pracy
+## 🔄 Work Flow
 
-1. **Odbieranie eventu**: Worker nasłuchuje `invoice.created` z RabbitMQ
-2. **Pobieranie danych**: Pobiera dane faktury z bazy danych
-3. **Generowanie PDF**: Tworzy PDF z polskimi znakami używając pdfkit
-4. **Zapisywanie pliku**: Zapisuje PDF w storage/pdfs/ z unikalną nazwą
-5. **Aktualizacja bazy**: Aktualizuje fakturę z nazwą wygenerowanego PDF
-6. **Publikowanie eventu**: Wysyła `invoice.send` z nazwą PDF
+1. **Event reception**: Worker listens to `invoice.created` from RabbitMQ
+2. **Data retrieval**: Retrieves invoice data from database
+3. **PDF generation**: Creates PDF with Polish characters using pdfkit
+4. **File saving**: Saves PDF in storage/pdfs/ with unique name
+5. **Database update**: Updates invoice with generated PDF name
+6. **Event publishing**: Sends `invoice.send` with PDF name
 
-## 📄 Generowanie PDF
+## 📄 PDF Generation
 
-### Funkcjonalności
-- **Polskie znaki**: Używa fontu DejaVu Sans dla polskich znaków
-- **Layout**: Profesjonalny layout faktury z logo
-- **Dane klienta**: Pełne dane klienta i faktury
-- **Pozycje**: Lista pozycji z kwotami
-- **Sumy**: Automatyczne obliczanie podsumowań
-- **Filenames**: Bezpieczne nazwy plików bez znaków specjalnych
+### Features
+- **Polish characters**: Uses DejaVu Sans font for Polish characters
+- **Layout**: Professional invoice layout with logo
+- **Client data**: Full client and invoice data
+- **Items**: List of items with amounts
+- **Totals**: Automatic total calculations
+- **Filenames**: Safe filenames without special characters
 
-### Przykład PDF
+### PDF example
 ```
 ┌─────────────────────────────────────┐
-│           FAKTURA VAT              │
-│  Nr: INV-2024-001                 │
-│  Data wystawienia: 2024-01-15     │
-│  Termin płatności: 2024-02-15     │
+│           VAT INVOICE              │
+│  No: INV-2024-001                 │
+│  Issue date: 2024-01-15           │
+│  Due date: 2024-02-15             │
 ├─────────────────────────────────────┤
-│ SPRZEDAWCA:                        │
-│ Firma XYZ Sp. z o.o.              │
-│ ul. Przykładowa 1, 00-000 Warszawa│
+│ SELLER:                            │
+│ Company XYZ Sp. z o.o.            │
+│ ul. Example 1, 00-000 Warsaw      │
 │ NIP: 1234567890                   │
 ├─────────────────────────────────────┤
-│ NABYWCA:                           │
-│ Klient ABC                         │
-│ ul. Testowa 5, 01-234 Kraków      │
+│ BUYER:                             │
+│ Client ABC                         │
+│ ul. Test 5, 01-234 Krakow         │
 │ NIP: 0987654321                   │
 ├─────────────────────────────────────┤
-│ POZYCJE:                           │
-│ 1. Usługa A - 100,00 zł           │
-│ 2. Produkt B - 200,00 zł          │
+│ ITEMS:                             │
+│ 1. Service A - 100,00 zł          │
+│ 2. Product B - 200,00 zł          │
 ├─────────────────────────────────────┤
-│ RAZEM: 300,00 zł                  │
+│ TOTAL: 300,00 zł                  │
 │ VAT (23%): 69,00 zł               │
-│ DO ZAPŁATY: 369,00 zł             │
+│ TO PAY: 369,00 zł                 │
 └─────────────────────────────────────┘
 ```
 
-## 🔗 Integracje
+## 🔗 Integrations
 
 ### RabbitMQ Events
-- **Odbiera**: `invoice.created` - Nowa faktura do wygenerowania
-- **Publikuje**: `invoice.send` - PDF wygenerowany, gotowy do wysłania
+- **Receives**: `invoice.created` - New invoice to generate
+- **Publishes**: `invoice.send` - PDF generated, ready to send
 
-### Baza danych
-- **Odczyt**: Pobiera dane faktury i klienta
-- **Zapis**: Aktualizuje fakturę z nazwą PDF
+### Database
+- **Read**: Retrieves invoice and client data
+- **Write**: Updates invoice with PDF name
 
 ### API
-- **Web-app**: Dostarcza dane faktur przez Prisma ORM
+- **Web-app**: Provides invoice data through Prisma ORM
 
-## 🔐 Bezpieczeństwo
+## 🔐 Security
 
-- **Worker Threads**: Asynchroniczne generowanie PDF
-- **Error Handling**: Obsługa błędów generowania
-- **File Validation**: Sprawdzanie poprawności plików
-- **Database Transactions**: Bezpieczne aktualizacje bazy
+- **Worker Threads**: Asynchronous PDF generation
+- **Error Handling**: PDF generation error handling
+- **File Validation**: File correctness checking
+- **Database Transactions**: Safe database updates
 
 ## 📊 Monitoring
 
-### Logi
+### Logs
 ```bash
-# Sprawdź logi
+# Check logs
 npm run start:dev
 
-# Logi RabbitMQ
+# RabbitMQ logs
 docker-compose logs rabbitmq
 ```
 
-### Statusy
-- **Processing**: Generowanie PDF w toku
-- **Success**: PDF wygenerowany pomyślnie
-- **Error**: Błąd generowania PDF
+### Statuses
+- **Processing**: PDF generation in progress
+- **Success**: PDF generated successfully
+- **Error**: PDF generation error
 
 ## 🐳 Docker
 
@@ -163,15 +163,15 @@ docker-compose logs rabbitmq
 # Build
 docker build -t invoice-worker .
 
-# Uruchomienie
+# Run
 docker run --env-file .env invoice-worker
 ```
 
-## 📞 Wsparcie
+## 📞 Support
 
-W przypadku problemów:
-1. Sprawdź logi: `npm run start:dev`
-2. Sprawdź RabbitMQ: http://localhost:15672
-3. Sprawdź storage: `ls -la storage/pdfs/`
-4. Sprawdź bazy danych: `npx prisma studio`
+In case of issues:
+1. Check logs: `npm run start:dev`
+2. Check RabbitMQ: http://localhost:15672
+3. Check storage: `ls -la storage/pdfs/`
+4. Check database: `npx prisma studio`
 5. Reset: `npm run clean && npm install`
