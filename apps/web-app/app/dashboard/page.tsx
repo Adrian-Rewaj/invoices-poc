@@ -130,21 +130,21 @@ export default function DashboardPage() {
   };
 
   const handleCreateInvoice = async (clientId: number) => {
-    // Przykładowe pozycje faktury
+    // Sample invoice items
     const sampleItems = [
       {
-        name: 'Usługa konsultingowa',
+        name: 'Consulting Service',
         quantity: 1,
         unitPrice: 500.00,
         total: 500.00,
-        description: 'Konsultacje w zakresie IT'
+        description: 'IT consulting services'
       },
       {
-        name: 'Subskrypcja',
+        name: 'Subscription',
         quantity: 1,
         unitPrice: 50.00,
         total: 50.00,
-        description: 'Subskrypcja miesięczna'
+        description: 'Monthly subscription'
       }
     ];
 
@@ -209,10 +209,10 @@ export default function DashboardPage() {
         router.push('/login');
       } else {
         const data = await res.json();
-        setEditError(data.error || 'Błąd edycji');
+        setEditError(data.error || 'Edit error');
       }
     } catch (e) {
-      setEditError('Błąd sieci');
+      setEditError('Network error');
     } finally {
       setEditLoading(false);
     }
@@ -255,11 +255,11 @@ export default function DashboardPage() {
         document.body.removeChild(a);
       } else {
         const errorData = await response.json();
-        alert(`Błąd pobierania PDF: ${errorData.error}`);
+        alert(`PDF download error: ${errorData.error}`);
       }
     } catch (error) {
       console.error('Error downloading PDF:', error);
-      alert('Błąd pobierania PDF');
+      alert('PDF download error');
     }
   };
 
@@ -322,11 +322,11 @@ export default function DashboardPage() {
       } else {
         const errorData = await response.json();
         console.error('Error creating invoice:', errorData.error);
-        alert(`Błąd tworzenia faktury: ${errorData.error}`);
+        alert(`Invoice creation error: ${errorData.error}`);
       }
     } catch (error) {
       console.error('Error creating invoice:', error);
-      alert('Błąd tworzenia faktury');
+      alert('Invoice creation error');
     }
   };
 
@@ -354,20 +354,19 @@ export default function DashboardPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
-                <h1 className="text-lg sm:text-xl font-bold text-gray-900">System Faktur</h1>
+                <h1 className="text-lg sm:text-xl font-bold text-gray-900">Invoice System</h1>
               </div>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4">
-              <span className="text-xs sm:text-sm text-gray-600 hidden sm:block">Witaj, dev!</span>
+              <span className="text-xs sm:text-sm text-gray-600 hidden sm:block">Welcome, dev!</span>
               <button
                 onClick={handleLogout}
                 className="inline-flex items-center px-3 py-2 border border-transparent text-xs sm:text-sm font-medium rounded-lg text-white bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200"
               >
-                <svg className="w-4 h-4 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
-                <span className="hidden sm:inline">Wyloguj</span>
-                <span className="sm:hidden">X</span>
+                Logout
               </button>
             </div>
           </div>
@@ -388,7 +387,7 @@ export default function DashboardPage() {
                 </div>
               </div>
               <div className="ml-3 sm:ml-4">
-                <p className="text-xs sm:text-sm font-medium text-gray-500">Klienci</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-500">Clients</p>
                 <p className="text-xl sm:text-2xl font-bold text-gray-900">{clients.length}</p>
               </div>
             </div>
@@ -404,7 +403,7 @@ export default function DashboardPage() {
                 </div>
               </div>
               <div className="ml-3 sm:ml-4">
-                <p className="text-xs sm:text-sm font-medium text-gray-500">Faktury</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-500">Invoices</p>
                 <p className="text-xl sm:text-2xl font-bold text-gray-900">{invoices.length}</p>
               </div>
             </div>
@@ -420,7 +419,7 @@ export default function DashboardPage() {
                 </div>
               </div>
               <div className="ml-3 sm:ml-4">
-                <p className="text-xs sm:text-sm font-medium text-gray-500">Przychód</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-500">Revenue</p>
                 <p className="text-xl sm:text-2xl font-bold text-gray-900">0 zł</p>
               </div>
             </div>
@@ -436,7 +435,7 @@ export default function DashboardPage() {
                   <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
-                  Klienci
+                  Clients
                 </h3>
                 <button
                   onClick={() => setShowAddClient(!showAddClient)}
@@ -445,7 +444,7 @@ export default function DashboardPage() {
                   <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                   </svg>
-                  Dodaj klienta
+                  Add Client
                 </button>
               </div>
             </div>
@@ -457,7 +456,7 @@ export default function DashboardPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                       <input
                         type="text"
-                        placeholder="Nazwa"
+                        placeholder="Name"
                         value={newClient.name}
                         onChange={(e) =>
                           setNewClient({ ...newClient, name: e.target.value })
@@ -491,14 +490,14 @@ export default function DashboardPage() {
                         type="submit"
                         className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors text-sm"
                       >
-                        Zapisz
+                        Save
                       </button>
                       <button
                         type="button"
                         onClick={() => setShowAddClient(false)}
                         className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors text-sm"
                       >
-                        Anuluj
+                        Cancel
                       </button>
                     </div>
                   </form>
@@ -525,7 +524,7 @@ export default function DashboardPage() {
                           <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536M9 13l6-6m2 2l-6 6m-2 2h2v2h2v-2h2v-2h-2v-2h-2v2H9v2z" />
                           </svg>
-                          Edytuj
+                          Edit
                         </button>
                         <button
                           onClick={() => handleCreateInvoice(client.id)}
@@ -534,7 +533,7 @@ export default function DashboardPage() {
                           <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                           </svg>
-                          Faktura
+                          Invoice
                         </button>
                       </div>
                     </div>
@@ -551,7 +550,7 @@ export default function DashboardPage() {
                 <svg className="w-4 h-4 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                Faktury
+                Invoices
               </h3>
             </div>
 
@@ -562,8 +561,8 @@ export default function DashboardPage() {
                     <svg className="mx-auto h-10 w-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    <h3 className="mt-2 text-sm font-medium text-gray-900">Brak faktur</h3>
-                    <p className="mt-1 text-xs sm:text-sm text-gray-500">Utwórz pierwszą fakturę dla klienta.</p>
+                    <h3 className="mt-2 text-sm font-medium text-gray-900">No invoices</h3>
+                    <p className="mt-1 text-xs sm:text-sm text-gray-500">Create the first invoice for a client.</p>
                   </div>
                 ) : (
                   invoices.map((invoice) => (
@@ -577,13 +576,13 @@ export default function DashboardPage() {
                             {invoice.invoiceNumber}
                           </h4>
                           <p className="text-xs sm:text-sm text-gray-600 mb-1">
-                            Klient: {invoice.client.name}
+                            Client: {invoice.client.name}
                           </p>
                           <p className="text-xs text-gray-500">
-                            Wystawiona: {new Date(invoice.issueDate).toLocaleDateString('pl-PL')}
+                            Issued: {new Date(invoice.issueDate).toLocaleDateString('en-US')}
                           </p>
                           <p className="text-xs text-gray-500">
-                            Termin płatności: {new Date(invoice.dueDate).toLocaleDateString('pl-PL')}
+                            Due date: {new Date(invoice.dueDate).toLocaleDateString('en-US')}
                           </p>
                           <p className="text-xs text-gray-500">
                             Status: <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
@@ -598,7 +597,7 @@ export default function DashboardPage() {
                           </p>
                           {invoice.data?.total && (
                             <p className="text-xs text-gray-500">
-                              Kwota: {invoice.data.total.toFixed(2)} zł
+                              Amount: {invoice.data.total.toFixed(2)} zł
                             </p>
                           )}
                         </div>
@@ -611,7 +610,7 @@ export default function DashboardPage() {
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                             </svg>
-                            <span className="hidden sm:inline">Podgląd</span>
+                            <span className="hidden sm:inline">Preview</span>
                             <span className="sm:hidden">👁</span>
                           </button>
                           <button 
@@ -649,13 +648,13 @@ export default function DashboardPage() {
             </button>
             
             <div className="mb-6">
-              <h3 className="text-xl font-semibold mb-2">Edytuj pozycje faktury</h3>
-              <p className="text-gray-600 text-sm">Dostosuj pozycje przed utworzeniem faktury</p>
+              <h3 className="text-xl font-semibold mb-2">Edit Invoice Items</h3>
+              <p className="text-gray-600 text-sm">Customize items before creating invoice</p>
             </div>
 
             <div className="mb-6">
               <div className="flex justify-between items-center mb-4">
-                <h4 className="font-semibold text-gray-700">Pozycje faktury</h4>
+                <h4 className="font-semibold text-gray-700">Invoice Items</h4>
                 <button
                   onClick={handleAddInvoiceItem}
                   className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -663,7 +662,7 @@ export default function DashboardPage() {
                   <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                   </svg>
-                  Dodaj pozycję
+                  Add Item
                 </button>
               </div>
 
@@ -671,7 +670,7 @@ export default function DashboardPage() {
                 {editingInvoiceItems.map((item, index) => (
                   <div key={index} className="border border-gray-200 rounded-lg p-4">
                     <div className="flex justify-between items-start mb-3">
-                      <h5 className="font-medium text-gray-700">Pozycja {index + 1}</h5>
+                      <h5 className="font-medium text-gray-700">Item {index + 1}</h5>
                       <button
                         onClick={() => handleRemoveInvoiceItem(index)}
                         className="text-red-500 hover:text-red-700"
@@ -684,18 +683,18 @@ export default function DashboardPage() {
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Nazwa</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
                         <input
                           type="text"
                           value={item.name}
                           onChange={(e) => handleUpdateInvoiceItem(index, 'name', e.target.value)}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          placeholder="Nazwa usługi/towaru"
+                          placeholder="Service/Product Name"
                         />
                       </div>
                       
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Ilość</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
                         <input
                           type="number"
                           min="1"
@@ -706,7 +705,7 @@ export default function DashboardPage() {
                       </div>
                       
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Cena j.m. (zł)</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Unit Price (zł)</label>
                         <input
                           type="number"
                           step="0.01"
@@ -718,7 +717,7 @@ export default function DashboardPage() {
                       </div>
                       
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Wartość (zł)</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Value (zł)</label>
                         <input
                           type="number"
                           step="0.01"
@@ -730,13 +729,13 @@ export default function DashboardPage() {
                     </div>
                     
                     <div className="mt-3">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Opis</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                       <input
                         type="text"
                         value={item.description}
                         onChange={(e) => handleUpdateInvoiceItem(index, 'description', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Opis pozycji (opcjonalnie)"
+                        placeholder="Item description (optional)"
                       />
                     </div>
                   </div>
@@ -749,7 +748,7 @@ export default function DashboardPage() {
                 <div className="flex justify-end">
                   <div className="w-64 text-sm">
                     <div className="flex justify-between py-1">
-                      <span className="text-gray-600">Wartość netto:</span>
+                      <span className="text-gray-600">Net Value:</span>
                       <span className="font-semibold">
                         {editingInvoiceItems.reduce((sum, item) => sum + (item.total || 0), 0).toFixed(2)} zł
                       </span>
@@ -761,7 +760,7 @@ export default function DashboardPage() {
                       </span>
                     </div>
                     <div className="flex justify-between py-2 border-t border-gray-200 font-semibold text-lg">
-                      <span>Razem:</span>
+                      <span>Total:</span>
                       <span>
                         {(editingInvoiceItems.reduce((sum, item) => sum + (item.total || 0), 0) * 1.23).toFixed(2)} zł
                       </span>
@@ -776,14 +775,14 @@ export default function DashboardPage() {
                 onClick={() => setShowInvoiceEditModal(false)}
                 className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
               >
-                Anuluj
+                Cancel
               </button>
               <button
                 onClick={handleSaveInvoice}
                 disabled={editingInvoiceItems.length === 0}
                 className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Utwórz fakturę
+                Create Invoice
               </button>
             </div>
           </div>
@@ -802,14 +801,14 @@ export default function DashboardPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-            <h3 className="text-lg font-semibold mb-4">Edytuj klienta</h3>
+            <h3 className="text-lg font-semibold mb-4">Edit Client</h3>
             <div className="space-y-3 mb-4">
               <input
                 type="text"
                 name="name"
                 value={editForm.name}
                 onChange={handleEditChange}
-                placeholder="Nazwa"
+                placeholder="Name"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <input
@@ -835,18 +834,18 @@ export default function DashboardPage() {
               disabled={editLoading}
               className="w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
             >
-              {editLoading ? 'Zapisywanie...' : 'Zapisz zmiany'}
+              {editLoading ? 'Saving...' : 'Save Changes'}
             </button>
             {/* Historia zmian */}
             <div className="mt-8">
-              <h4 className="text-md font-semibold mb-2">Historia zmian ({changeLogs.length})</h4>
+              <h4 className="text-md font-semibold mb-2">Change History ({changeLogs.length})</h4>
               <div className="max-h-48 overflow-y-auto divide-y divide-gray-100">
-                {changeLogs.length === 0 && <div className="text-gray-400 text-sm">Brak zmian</div>}
+                {changeLogs.length === 0 && <div className="text-gray-400 text-sm">No changes</div>}
                 {changeLogs.map((log) => (
                   <div key={log.id} className="py-2 text-sm">
                     <div className="flex justify-between items-center">
-                      <span className="font-medium text-gray-700">{log.user?.username || 'Użytkownik'}</span>
-                      <span className="text-xs text-gray-400">{new Date(log.changedAt).toLocaleString('pl-PL')}</span>
+                      <span className="font-medium text-gray-700">{log.user?.username || 'User'}</span>
+                      <span className="text-xs text-gray-400">{new Date(log.changedAt).toLocaleString('en-US')}</span>
                     </div>
                     <div className="mt-1">
                       <span className="text-gray-500">{log.field}</span>: 
@@ -875,17 +874,17 @@ export default function DashboardPage() {
             </button>
             
             <div className="mb-6">
-              <h3 className="text-xl font-semibold mb-2">Faktura {selectedInvoice.invoiceNumber}</h3>
+              <h3 className="text-xl font-semibold mb-2">Invoice {selectedInvoice.invoiceNumber}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div>
-                  <h4 className="font-semibold text-gray-700 mb-2">Dane sprzedawcy</h4>
-                  <p className="text-gray-600">Twoja Firma Sp. z o.o.</p>
-                  <p className="text-gray-600">ul. Przykładowa 123, 00-000 Warszawa</p>
+                  <h4 className="font-semibold text-gray-700 mb-2">Seller Information</h4>
+                  <p className="text-gray-600">Your Company Sp. z o.o.</p>
+                  <p className="text-gray-600">ul. Example 123, 00-000 Warsaw</p>
                   <p className="text-gray-600">NIP: 123-456-78-90</p>
-                  <p className="text-gray-600">Email: faktury@twojafirma.pl</p>
+                  <p className="text-gray-600">Email: invoices@yourcompany.pl</p>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-gray-700 mb-2">Dane nabywcy</h4>
+                  <h4 className="font-semibold text-gray-700 mb-2">Buyer Information</h4>
                   <p className="text-gray-600">{selectedInvoice.client.name}</p>
                   <p className="text-gray-600">Email: {selectedInvoice.client.email}</p>
                   <p className="text-gray-600">NIP: {selectedInvoice.client.nip}</p>
@@ -896,12 +895,12 @@ export default function DashboardPage() {
             <div className="mb-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                 <div>
-                  <span className="font-semibold text-gray-700">Data wystawienia:</span>
-                  <p className="text-gray-600">{new Date(selectedInvoice.issueDate).toLocaleDateString('pl-PL')}</p>
+                  <span className="font-semibold text-gray-700">Issue date:</span>
+                  <p className="text-gray-600">{new Date(selectedInvoice.issueDate).toLocaleDateString('en-US')}</p>
                 </div>
                 <div>
-                  <span className="font-semibold text-gray-700">Termin płatności:</span>
-                  <p className="text-gray-600">{new Date(selectedInvoice.dueDate).toLocaleDateString('pl-PL')}</p>
+                  <span className="font-semibold text-gray-700">Due date:</span>
+                  <p className="text-gray-600">{new Date(selectedInvoice.dueDate).toLocaleDateString('en-US')}</p>
                 </div>
                 <div>
                   <span className="font-semibold text-gray-700">Status:</span>
@@ -922,15 +921,15 @@ export default function DashboardPage() {
 
             {selectedInvoice.data?.items && selectedInvoice.data.items.length > 0 && (
               <div className="mb-6">
-                <h4 className="font-semibold text-gray-700 mb-3">Pozycje faktury</h4>
+                <h4 className="font-semibold text-gray-700 mb-3">Invoice Items</h4>
                 <div className="border border-gray-200 rounded-lg overflow-hidden">
                   <table className="w-full text-sm">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-4 py-2 text-left font-semibold text-gray-700">Nazwa</th>
-                        <th className="px-4 py-2 text-right font-semibold text-gray-700">Ilość</th>
-                        <th className="px-4 py-2 text-right font-semibold text-gray-700">Cena j.m.</th>
-                        <th className="px-4 py-2 text-right font-semibold text-gray-700">Wartość</th>
+                        <th className="px-4 py-2 text-left font-semibold text-gray-700">Name</th>
+                        <th className="px-4 py-2 text-right font-semibold text-gray-700">Quantity</th>
+                        <th className="px-4 py-2 text-right font-semibold text-gray-700">Unit Price</th>
+                        <th className="px-4 py-2 text-right font-semibold text-gray-700">Value</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -953,7 +952,7 @@ export default function DashboardPage() {
                 <div className="flex justify-end">
                   <div className="w-64 text-sm">
                     <div className="flex justify-between py-1">
-                      <span className="text-gray-600">Wartość netto:</span>
+                      <span className="text-gray-600">Net value:</span>
                       <span className="font-semibold">{selectedInvoice.data.subtotal?.toFixed(2)} zł</span>
                     </div>
                     <div className="flex justify-between py-1">
@@ -961,7 +960,7 @@ export default function DashboardPage() {
                       <span className="font-semibold">{selectedInvoice.data.vatAmount?.toFixed(2)} zł</span>
                     </div>
                     <div className="flex justify-between py-2 border-t border-gray-200 font-semibold text-lg">
-                      <span>Razem:</span>
+                      <span>Total:</span>
                       <span>{selectedInvoice.data.total?.toFixed(2)} zł</span>
                     </div>
                   </div>
@@ -970,11 +969,11 @@ export default function DashboardPage() {
             )}
 
             <div className="mb-6">
-              <h4 className="font-semibold text-gray-700 mb-2">Dane do płatności</h4>
+              <h4 className="font-semibold text-gray-700 mb-2">Payment Information</h4>
               <div className="bg-gray-50 p-4 rounded-lg text-sm">
-                <p className="text-gray-600"><span className="font-semibold">Bank:</span> Przykładowy Bank S.A.</p>
-                <p className="text-gray-600"><span className="font-semibold">Nr konta:</span> 12 1234 5678 9012 3456 7890 1234</p>
-                <p className="text-gray-600"><span className="font-semibold">SWIFT:</span> PRZAPLXX</p>
+                <p className="text-gray-600"><span className="font-semibold">Bank:</span> Example Bank S.A.</p>
+                <p className="text-gray-600"><span className="font-semibold">Account number:</span> 12 1234 5678 9012 3456 7890 1234</p>
+                <p className="text-gray-600"><span className="font-semibold">SWIFT:</span> EXAPLXX</p>
                 <p className="text-gray-600"><span className="font-semibold">IBAN:</span> PL12 1234 5678 9012 3456 7890 1234</p>
               </div>
             </div>
@@ -984,13 +983,13 @@ export default function DashboardPage() {
                 onClick={() => handleDownloadPDF(selectedInvoice)}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                Pobierz PDF
+                Download PDF
               </button>
               <button
                 onClick={() => setShowInvoiceModal(false)}
                 className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
               >
-                Zamknij
+                Close
               </button>
             </div>
           </div>

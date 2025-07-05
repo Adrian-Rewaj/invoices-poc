@@ -1,4 +1,4 @@
-# Invoice System - Monorepo
+# Invoice System - Monorepo - Proof Of Concept
 
 Modern invoice system built as a monorepo with four JavaScript applications:
 - **web-app** (Next.js) - Main application with user interface

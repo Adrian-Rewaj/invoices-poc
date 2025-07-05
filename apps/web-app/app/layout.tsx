@@ -5,10 +5,10 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'System Faktur - Nowoczesny system zarządzania fakturami',
-  description: 'Profesjonalny system do zarządzania klientami i fakturami z integracją RabbitMQ',
-  keywords: 'faktury, system faktur, zarządzanie klientami, RabbitMQ, Next.js',
-  authors: [{ name: 'System Faktur Team' }],
+  title: 'Invoice System - Modern invoice management system',
+  description: 'Professional system for managing clients and invoices with RabbitMQ integration',
+  keywords: 'invoices, invoice system, client management, RabbitMQ, Next.js',
+  authors: [{ name: 'Invoice System Team' }],
   viewport: 'width=device-width, initial-scale=1',
 };
 
@@ -18,7 +18,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="pl" className="h-full">
+    <html lang="en" className="h-full">
       <body className={`${inter.className} h-full antialiased`}>
         {children}
       </body>

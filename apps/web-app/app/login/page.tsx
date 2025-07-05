@@ -54,10 +54,10 @@ export default function LoginPage() {
             </svg>
           </div>
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            System Faktur
+            Invoice System
           </h2>
           <p className="text-gray-600">
-            Zaloguj się do swojego konta
+            Sign in to your account
           </p>
         </div>
 
@@ -65,7 +65,7 @@ export default function LoginPage() {
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
-                Nazwa użytkownika
+                Username
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -79,7 +79,7 @@ export default function LoginPage() {
                   type="text"
                   required
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm sm:text-base"
-                  placeholder="Wprowadź nazwę użytkownika"
+                  placeholder="Enter username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                 />
@@ -88,7 +88,7 @@ export default function LoginPage() {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Hasło
+                Password
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -102,7 +102,7 @@ export default function LoginPage() {
                   type="password"
                   required
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm sm:text-base"
-                  placeholder="Wprowadź hasło"
+                  placeholder="Enter password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
@@ -136,14 +136,14 @@ export default function LoginPage() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Logowanie...
+                    Signing in...
                   </div>
                 ) : (
                   <div className="flex items-center">
                     <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                     </svg>
-                    Zaloguj się
+                    Sign in
                   </div>
                 )}
               </button>
@@ -152,7 +152,7 @@ export default function LoginPage() {
 
           <div className="mt-6 text-center">
             <p className="text-xs text-gray-500">
-              Domyślne dane logowania: <span className="font-mono bg-gray-100 px-2 py-1 rounded">dev</span> / <span className="font-mono bg-gray-100 px-2 py-1 rounded">dev</span>
+              Default login credentials: <span className="font-mono bg-gray-100 px-2 py-1 rounded">dev</span> / <span className="font-mono bg-gray-100 px-2 py-1 rounded">dev</span>
             </p>
           </div>
         </div>
@@ -160,7 +160,7 @@ export default function LoginPage() {
         {/* Footer */}
         <div className="text-center">
           <p className="text-xs text-gray-400">
-            © 2024 System Faktur. Wszystkie prawa zastrzeżone.
+            © 2024 Invoice System. All rights reserved.
           </p>
         </div>
       </div>
