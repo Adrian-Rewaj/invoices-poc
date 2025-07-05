@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: invoices-postgres
+    environment:
+      POSTGRES_DB: invoices_db
+      POSTGRES_USER: invoices_user
+      POSTGRES_PASSWORD: invoices_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - invoices-network
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: invoices-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: invoices_user
+      RABBITMQ_DEFAULT_PASS: invoices_password
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - invoices-network
+
+  web-app:
+    build:
+      context: .
+      dockerfile: apps/web-app/Dockerfile
+    container_name: invoices-web-app
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://invoices_user:invoices_password@postgres:5432/invoices_db
+      - RABBITMQ_URL=amqp://invoices_user:invoices_password@rabbitmq:5672
+      - JWT_SECRET=your-super-secret-jwt-key-change-in-production
+      - NODE_ENV=development
+    depends_on:
+      - postgres
+      - rabbitmq
+    volumes:
+      - ./apps/web-app:/app
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - invoices-network
+
+volumes:
+  postgres_data:
+  rabbitmq_data:
+
+networks:
+  invoices-network:
+    driver: bridge 

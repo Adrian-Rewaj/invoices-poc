@@ -1,0 +1,41 @@
+{
+  "name": "invoices-poc",
+  "version": "1.0.0",
+  "description": "System faktur - monorepo z Next.js, Nest.js i Express.js",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "type-check": "turbo run type-check",
+    "clean": "turbo run clean",
+    "test": "turbo run test",
+    "test:watch": "turbo run test:watch",
+    "test:coverage": "turbo run test:coverage",
+    "test:e2e": "turbo run test:e2e",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:build": "docker-compose build",
+    "docker:logs": "docker-compose logs -f",
+    "docker:restart": "docker-compose restart",
+    "setup": "npm install && npm run docker:up",
+    "reset": "npm run docker:down && npm run docker:up && npm run dev",
+    "db:studio": "cd apps/web-app && npx prisma studio",
+    "db:migrate": "cd apps/web-app && npx prisma migrate dev",
+    "db:generate": "cd apps/web-app && npx prisma generate"
+  },
+  "devDependencies": {
+    "turbo": "^1.10.16",
+    "@types/node": "^20.8.0",
+    "typescript": "^5.2.0",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+} 
