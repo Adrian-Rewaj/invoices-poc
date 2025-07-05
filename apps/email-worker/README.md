@@ -1,46 +1,46 @@
-# Email Worker - Wysyłanie Emaili z Fakturami
+# Email Worker - Sending Emails with Invoices
 
-Worker Express.js do automatycznego wysyłania emaili z załączonymi PDF faktur.
+Express.js worker for automatically sending emails with attached PDF invoices.
 
-## 🚀 Opis
+## 🚀 Description
 
-Email Worker to aplikacja Express.js, która:
-- Nasłuchuje eventów `invoice.send` z RabbitMQ
-- Pobiera dane faktury i klienta z bazy danych
-- Wysyła email z załączonym PDF faktury
-- Dodaje link do płatności w treści emaila
-- Aktualizuje status faktury na "sent"
+Email Worker is an Express.js application that:
+- Listens to `invoice.send` events from RabbitMQ
+- Retrieves invoice and client data from database
+- Sends email with attached PDF invoice
+- Adds payment link in email content
+- Updates invoice status to "sent"
 
-## 🛠️ Technologie
+## 🛠️ Technologies
 
-- **Express.js** - Framework Node.js
+- **Express.js** - Node.js framework
 - **TypeScript** - Type safety
-- **nodemailer** - Wysyłanie emaili
-- **RabbitMQ** - Komunikacja event-driven
-- **Prisma** - ORM dla bazy danych
-- **SMTP** - Protokół wysyłania emaili
+- **nodemailer** - Email sending
+- **RabbitMQ** - Event-driven communication
+- **Prisma** - ORM for database
+- **SMTP** - Email sending protocol
 
-## 🚀 Uruchomienie
+## 🚀 Setup
 
 ```bash
-# Instalacja zależności
+# Install dependencies
 npm install
 
-# Uruchomienie w trybie deweloperskim
+# Start in development mode
 npm run dev
 
-# Uruchomienie produkcyjne
+# Production start
 npm start
 
 # Build
 npm run build
 ```
 
-## 🔧 Konfiguracja
+## 🔧 Configuration
 
-### Zmienne środowiskowe (.env)
+### Environment variables (.env)
 ```env
-# Baza danych
+# Database
 DATABASE_URL="postgresql://invoices_user:invoices_password@localhost:5433/invoices_db"
 
 # RabbitMQ
@@ -54,42 +54,42 @@ SMTP_PASS="your-app-password"
 
 # Email
 FROM_EMAIL="noreply@faktury.pl"
-FROM_NAME="System Faktur"
+FROM_NAME="Invoice System"
 
 # Payment
 PAYMENT_BASE_URL="http://localhost:3003"
 ```
 
-## 📁 Struktura projektu
+## 📁 Project Structure
 
 ```
 email-worker/
 ├── src/
-│   ├── app.ts            # Główna aplikacja Express
+│   ├── app.ts            # Main Express application
 │   ├── server.ts         # Entry point
-│   ├── services/         # Serwisy
+│   ├── services/         # Services
 │   │   ├── email.service.ts
 │   │   ├── invoice.service.ts
 │   │   └── rabbitmq.service.ts
-│   ├── templates/        # Szablony emaili
+│   ├── templates/        # Email templates
 │   │   └── invoice-email.html
-│   └── types/           # Typy TypeScript
+│   └── types/           # TypeScript types
 │       └── index.ts
-├── prisma/              # Schema bazy danych
+├── prisma/              # Database schema
 │   └── schema.prisma
 └── package.json
 ```
 
-## 🔄 Flow pracy
+## 🔄 Work Flow
 
-1. **Odbieranie eventu**: Worker nasłuchuje `invoice.send` z RabbitMQ
-2. **Pobieranie danych**: Pobiera dane faktury, klienta i PDF z bazy
-3. **Generowanie emaila**: Tworzy email z szablonem HTML
-4. **Załączanie PDF**: Dodaje wygenerowany PDF jako załącznik
-5. **Wysyłanie**: Wysyła email przez SMTP
-6. **Aktualizacja statusu**: Zmienia status faktury na "sent"
+1. **Event reception**: Worker listens to `invoice.send` from RabbitMQ
+2. **Data retrieval**: Retrieves invoice, client and PDF data from database
+3. **Email generation**: Creates email with HTML template
+4. **PDF attachment**: Adds generated PDF as attachment
+5. **Sending**: Sends email via SMTP
+6. **Status update**: Changes invoice status to "sent"
 
-## 📧 Szablon emaila
+## 📧 Email Template
 
 ### HTML Template
 ```html
@@ -97,89 +97,89 @@ email-worker/
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Faktura {{invoiceNumber}}</title>
+    <title>Invoice {{invoiceNumber}}</title>
 </head>
 <body>
-    <h2>Faktura {{invoiceNumber}}</h2>
-    <p>Dzień dobry {{clientName}},</p>
-    <p>W załączeniu przesyłamy fakturę nr {{invoiceNumber}}.</p>
-    <p>Kwota do zapłaty: {{totalAmount}} zł</p>
-    <p>Termin płatności: {{dueDate}}</p>
+    <h2>Invoice {{invoiceNumber}}</h2>
+    <p>Hello {{clientName}},</p>
+    <p>Please find attached invoice {{invoiceNumber}}.</p>
+    <p>Amount to pay: {{totalAmount}} zł</p>
+    <p>Due date: {{dueDate}}</p>
     
     <div style="margin: 20px 0;">
         <a href="{{paymentUrl}}" style="background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
-            Zapłać teraz
+            Pay now
         </a>
     </div>
     
-    <p>Pozdrawiamy,<br>System Faktur</p>
+    <p>Best regards,<br>Invoice System</p>
 </body>
 </html>
 ```
 
-### Przykład emaila
+### Email example
 ```
-Od: System Faktur <noreply@faktury.pl>
-Do: klient@example.com
-Temat: Faktura INV-2024-001
+From: Invoice System <noreply@faktury.pl>
+To: client@example.com
+Subject: Invoice INV-2024-001
 
-Dzień dobry Jan Kowalski,
+Hello Jan Kowalski,
 
-W załączeniu przesyłamy fakturę nr INV-2024-001.
+Please find attached invoice INV-2024-001.
 
-Kwota do zapłaty: 369,00 zł
-Termin płatności: 2024-02-15
+Amount to pay: 369,00 zł
+Due date: 2024-02-15
 
-[Zapłać teraz] - http://localhost:3003/pay/abc123
+[Pay now] - http://localhost:3003/pay/abc123
 
-Pozdrawiamy,
-System Faktur
+Best regards,
+Invoice System
 
-Załączniki:
+Attachments:
 - faktura_INV-2024-001.pdf
 ```
 
-## 🔗 Integracje
+## 🔗 Integrations
 
 ### RabbitMQ Events
-- **Odbiera**: `invoice.send` - PDF wygenerowany, gotowy do wysłania
+- **Receives**: `invoice.send` - PDF generated, ready to send
 
-### Baza danych
-- **Odczyt**: Pobiera dane faktury, klienta i nazwę PDF
-- **Zapis**: Aktualizuje status faktury na "sent"
+### Database
+- **Read**: Retrieves invoice, client and PDF filename data
+- **Write**: Updates invoice status to "sent"
 
 ### API
-- **Web-app**: Dostarcza dane faktur przez Prisma ORM
-- **Pay-mock**: Generuje link do płatności
+- **Web-app**: Provides invoice data through Prisma ORM
+- **Pay-mock**: Generates payment link
 
 ### SMTP
-- **Gmail**: SMTP z autoryzacją OAuth2
-- **Inne**: Dowolny serwer SMTP
+- **Gmail**: SMTP with OAuth2 authorization
+- **Others**: Any SMTP server
 
-## 🔐 Bezpieczeństwo
+## 🔐 Security
 
-- **SMTP Auth**: Bezpieczna autoryzacja SMTP
-- **Email Validation**: Walidacja adresów email
-- **Error Handling**: Obsługa błędów wysyłania
-- **Rate Limiting**: Ograniczenie liczby emaili
-- **Logging**: Logowanie wszystkich operacji
+- **SMTP Auth**: Secure SMTP authorization
+- **Email Validation**: Email address validation
+- **Error Handling**: Email sending error handling
+- **Rate Limiting**: Email sending rate limiting
+- **Logging**: All operations logging
 
 ## 📊 Monitoring
 
-### Logi
+### Logs
 ```bash
-# Sprawdź logi
+# Check logs
 npm run dev
 
-# Logi RabbitMQ
+# RabbitMQ logs
 docker-compose logs rabbitmq
 ```
 
-### Statusy emaili
-- **Pending**: Email w kolejce
-- **Sent**: Email wysłany pomyślnie
-- **Failed**: Błąd wysyłania
-- **Bounced**: Email zwrócony
+### Email statuses
+- **Pending**: Email in queue
+- **Sent**: Email sent successfully
+- **Failed**: Sending error
+- **Bounced**: Email returned
 
 ## 🐳 Docker
 
@@ -187,20 +187,20 @@ docker-compose logs rabbitmq
 # Build
 docker build -t email-worker .
 
-# Uruchomienie
+# Run
 docker run --env-file .env email-worker
 ```
 
-## 📞 Wsparcie
+## 📞 Support
 
-W przypadku problemów:
-1. Sprawdź logi: `npm run dev`
-2. Sprawdź RabbitMQ: http://localhost:15672
-3. Sprawdź SMTP: `telnet smtp.gmail.com 587`
-4. Sprawdź bazy danych: `npx prisma studio`
+In case of issues:
+1. Check logs: `npm run dev`
+2. Check RabbitMQ: http://localhost:15672
+3. Check SMTP: `telnet smtp.gmail.com 587`
+4. Check database: `npx prisma studio`
 5. Reset: `npm run clean && npm install`
 
-## 📧 Konfiguracja SMTP
+## 📧 SMTP Configuration
 
 ### Gmail
 ```env
@@ -210,7 +210,7 @@ SMTP_USER=your-email@gmail.com
 SMTP_PASS=your-app-password
 ```
 
-### Inne serwery
+### Other servers
 ```env
 SMTP_HOST=smtp.example.com
 SMTP_PORT=587

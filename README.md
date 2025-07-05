@@ -1,63 +1,63 @@
-# System Faktur - Monorepo
+# Invoice System - Monorepo
 
-Nowoczesny system faktur zbudowany jako monorepo z czterema aplikacjami JavaScript:
-- **web-app** (Next.js) - Aplikacja główna z interfejsem użytkownika
-- **invoice-worker** (Nest.js) - Worker do generowania PDF faktur
-- **email-worker** (Express.js) - Worker do wysyłania emaili
-- **pay-mock** (Express.js) - Mock aplikacja do symulacji płatności
+Modern invoice system built as a monorepo with four JavaScript applications:
+- **web-app** (Next.js) - Main application with user interface
+- **invoice-worker** (Nest.js) - Worker for generating PDF invoices
+- **email-worker** (Express.js) - Worker for sending emails
+- **pay-mock** (Express.js) - Mock application for payment simulation
 
-![Dashboard aplikacji](assets/screen.png)
+![Application Dashboard](assets/screen.png)
 
-## 🚀 Szybki start
+## 🚀 Quick Start
 
-### Wymagania
+### Requirements
 - Node.js 18+
-- Docker i Docker Compose
+- Docker and Docker Compose
 - npm
 
-### Uruchomienie
+### Setup
 
-1. **Klonowanie i instalacja**
+1. **Cloning and installation**
 ```bash
 git clone <repository-url>
 cd invoices-poc
 npm install
 ```
 
-2. **Uruchomienie środowiska**
+2. **Environment setup**
 ```bash
-# Uruchomienie wszystkich kontenerów (PostgreSQL, RabbitMQ)
+# Start all containers (PostgreSQL, RabbitMQ)
 npm run docker:up
 
-# Uruchomienie wszystkich aplikacji
+# Start all applications
 npm run dev
 ```
 
-3. **Dostęp do aplikacji**
-- **Aplikacja główna**: http://localhost:3001
+3. **Application access**
+- **Main application**: http://localhost:3001
 - **Pay Mock**: http://localhost:3003
-- **RabbitMQ Management**: http://localhost:15672 (użytkownik: invoices_user, hasło: invoices_password)
+- **RabbitMQ Management**: http://localhost:15672 (user: invoices_user, password: invoices_password)
 - **PostgreSQL**: localhost:5433
 
-### Domyślne dane logowania
+### Default login credentials
 - **Login**: dev
-- **Hasło**: dev
+- **Password**: dev
 
-## 🧪 Testy
+## 🧪 Testing
 
-### Testy w całym monorepo
+### Tests across the entire monorepo
 ```bash
-# Wszystkie testy
+# All tests
 npm run test
 
-# Testy z coverage
+# Tests with coverage
 npm run test:coverage
 
-# Testy E2E
+# E2E tests
 npm run test:e2e
 ```
 
-### Testy w poszczególnych aplikacjach
+### Tests in individual applications
 ```bash
 # Web App
 cd apps/web-app && npm test
@@ -72,59 +72,59 @@ cd apps/email-worker && npm test
 cd apps/pay-mock && npm test
 ```
 
-### Rodzaje testów
-- **Unit Tests**: Testy funkcji i komponentów
-- **Integration Tests**: Testy API i integracji
-- **E2E Tests**: Testy całego flow aplikacji (Playwright)
+### Test types
+- **Unit Tests**: Function and component tests
+- **Integration Tests**: API and integration tests
+- **E2E Tests**: Full application flow tests (Playwright)
 
-## 📁 Struktura projektu
+## 📁 Project Structure
 
 ```
 invoices-poc/
 ├── apps/
-│   ├── web-app/          # Aplikacja Next.js (App Router + TypeScript)
-│   │   ├── app/          # Strony i API routes
-│   │   ├── lib/          # Biblioteki (Prisma, Auth, RabbitMQ)
-│   │   ├── prisma/       # Schema bazy danych
-│   │   ├── __tests__/    # Testy jednostkowe i integracyjne
-│   │   └── tests/        # Testy E2E
-│   ├── invoice-worker/    # Worker do generowania PDF
-│   ├── email-worker/      # Worker do wysyłania emaili
-│   └── pay-mock/         # Mock aplikacja płatności
-├── storage/              # Pliki PDF i uploads
-├── assets/               # Zasoby (fonty, etc.)
-├── docker-compose.yml    # Konfiguracja Docker
-├── turbo.json           # Konfiguracja monorepo
-└── package.json         # Główny package.json
+│   ├── web-app/          # Next.js application (App Router + TypeScript)
+│   │   ├── app/          # Pages and API routes
+│   │   ├── lib/          # Libraries (Prisma, Auth, RabbitMQ)
+│   │   ├── prisma/       # Database schema
+│   │   ├── __tests__/    # Unit and integration tests
+│   │   └── tests/        # E2E tests
+│   ├── invoice-worker/    # PDF generation worker
+│   ├── email-worker/      # Email sending worker
+│   └── pay-mock/         # Payment mock application
+├── storage/              # PDF files and uploads
+├── assets/               # Resources (fonts, etc.)
+├── docker-compose.yml    # Docker configuration
+├── turbo.json           # Monorepo configuration
+└── package.json         # Main package.json
 ```
 
-## 🔧 Funkcjonalności
+## 🔧 Features
 
-### ✅ Zaimplementowane
-- **Autentykacja JWT**: Logowanie z hasłem bcrypt
-- **Dashboard**: Lista klientów i faktur z statusami (draft, sent, paid)
-- **Zarządzanie klientami**: Dodawanie i edycja klientów z historią zmian
-- **Zarządzanie fakturami**: Tworzenie faktur z pozycjami w modalnym edytorze
-- **Generowanie PDF**: Automatyczne generowanie faktur PDF z polskimi znakami (DejaVu Sans)
-- **Wysyłanie emaili**: Automatyczne wysyłanie faktur email z linkiem do płatności
-- **System płatności**: Mock aplikacja do symulacji płatności z webhook
-- **Event-driven**: RabbitMQ dla komunikacji między aplikacjami
-- **Docker**: Kompletne środowisko kontenerowe
-- **Monorepo**: Turborepo z npm workspaces
-- **Testy**: Unit, integration i E2E tests
+### ✅ Implemented
+- **JWT Authentication**: Login with bcrypt password
+- **Dashboard**: List of clients and invoices with statuses (draft, sent, paid)
+- **Client Management**: Adding and editing clients with change history
+- **Invoice Management**: Creating invoices with items in modal editor
+- **PDF Generation**: Automatic invoice PDF generation with Polish characters (DejaVu Sans)
+- **Email Sending**: Automatic invoice email sending with payment link
+- **Payment System**: Mock application for payment simulation with webhook
+- **Event-driven**: RabbitMQ for communication between applications
+- **Docker**: Complete containerized environment
+- **Monorepo**: Turborepo with npm workspaces
+- **Testing**: Unit, integration and E2E tests
 
 ### 🔄 API Endpoints
-- `POST /api/auth/login` - Logowanie użytkownika
-- `GET /api/clients` - Lista klientów
-- `POST /api/clients` - Dodanie nowego klienta
-- `PUT /api/clients/[id]` - Edycja klienta z historią zmian
-- `GET /api/invoices` - Lista faktur
-- `POST /api/invoices` - Utworzenie nowej faktury
-- `GET /api/invoices/[id]/pdf` - Pobieranie PDF faktury
-- `GET /api/invoices/by-token/[token]` - Pobieranie faktury po tokenie płatności
-- `POST /api/payments/webhook` - Webhook płatności z weryfikacją podpisu
+- `POST /api/auth/login` - User login
+- `GET /api/clients` - Client list
+- `POST /api/clients` - Add new client
+- `PUT /api/clients/[id]` - Edit client with change history
+- `GET /api/invoices` - Invoice list
+- `POST /api/invoices` - Create new invoice
+- `GET /api/invoices/[id]/pdf` - Download invoice PDF
+- `GET /api/invoices/by-token/[token]` - Get invoice by payment token
+- `POST /api/payments/webhook` - Payment webhook with signature verification
 
-### 🗄️ Model bazy danych
+### 🗄️ Database Model
 ```sql
 User (id, username, passwordHash, createdAt)
 Client (id, name, email, nip, createdAt)
@@ -134,33 +134,33 @@ ClientChangeLog (id, clientId, userId, changedAt, before, after, field)
 
 ## 🐳 Docker
 
-### Kontenery
-- **PostgreSQL**: Baza danych (port 5433)
+### Containers
+- **PostgreSQL**: Database (port 5433)
 - **RabbitMQ**: Message broker (port 5672, management 15672)
 
-### Komendy Docker
+### Docker Commands
 ```bash
-# Uruchomienie
+# Start
 docker-compose up -d
 
-# Zatrzymanie
+# Stop
 docker-compose down
 
 # Rebuild
 docker-compose build
 
-# Logi
+# Logs
 docker-compose logs -f
 ```
 
-## 🛠️ Rozwój
+## 🛠️ Development
 
-### Skrypty npm
+### npm Scripts
 ```bash
-# Uruchomienie wszystkich aplikacji w trybie deweloperskim
+# Start all applications in development mode
 npm run dev
 
-# Build wszystkich aplikacji
+# Build all applications
 npm run build
 
 # Linting
@@ -169,7 +169,7 @@ npm run lint
 # Type checking
 npm run type-check
 
-# Testy
+# Tests
 npm run test
 npm run test:coverage
 npm run test:e2e
@@ -180,47 +180,47 @@ npm run docker:down
 npm run docker:logs
 ```
 
-### Aplikacje
-- **web-app** (port 3001): Next.js z TypeScript, Tailwind CSS, Prisma
-- **invoice-worker**: Nest.js worker do generowania PDF z pdfkit
-- **email-worker**: Express.js worker do wysyłania emaili z nodemailer
-- **pay-mock** (port 3003): Express.js mock płatności z webhook
+### Applications
+- **web-app** (port 3001): Next.js with TypeScript, Tailwind CSS, Prisma
+- **invoice-worker**: Nest.js worker for PDF generation with pdfkit
+- **email-worker**: Express.js worker for sending emails with nodemailer
+- **pay-mock** (port 3003): Express.js payment mock with webhook
 
-## 🔄 Flow aplikacji
+## 🔄 Application Flow
 
-1. **Tworzenie faktury**: Użytkownik tworzy fakturę w web-app z pozycjami
-2. **Event invoice.created**: Web-app publikuje event do RabbitMQ z danymi faktury
-3. **Generowanie PDF**: invoice-worker odbiera event i generuje PDF z polskimi znakami
-4. **Event invoice.send**: invoice-worker publikuje event z nazwą wygenerowanego PDF
-5. **Wysyłanie emaila**: email-worker odbiera event i wysyła email z PDF i linkiem do płatności
-6. **Aktualizacja statusu**: email-worker aktualizuje status faktury na "sent"
-7. **Płatność**: Użytkownik klika link w emailu i płaci przez pay-mock
-8. **Webhook**: pay-mock wysyła webhook do web-app z podpisem
-9. **Status "paid"**: Web-app weryfikuje podpis i aktualizuje status faktury na "paid"
+1. **Invoice Creation**: User creates invoice in web-app with items
+2. **Event invoice.created**: Web-app publishes event to RabbitMQ with invoice data
+3. **PDF Generation**: invoice-worker receives event and generates PDF with Polish characters
+4. **Event invoice.send**: invoice-worker publishes event with generated PDF filename
+5. **Email Sending**: email-worker receives event and sends email with PDF and payment link
+6. **Status Update**: email-worker updates invoice status to "sent"
+7. **Payment**: User clicks link in email and pays through pay-mock
+8. **Webhook**: pay-mock sends webhook to web-app with signature
+9. **Status "paid"**: Web-app verifies signature and updates invoice status to "paid"
 
-## 🔐 Bezpieczeństwo
+## 🔐 Security
 
-- **Hasła**: bcrypt z salt rounds 10
-- **JWT**: 24h expiration z refresh token
-- **Webhook signature**: Weryfikacja podpisu webhooków (X-PAYMENT-SIGNATURE)
-- **CORS**: Poprawnie skonfigurowane nagłówki CORS dla cross-origin requests
-- **Baza danych**: Izolowane kontenery Docker
-- **Environment variables**: Konfiguracja przez .env w każdej aplikacji
-- **SQL Injection**: Zabezpieczenia przez Prisma ORM
+- **Passwords**: bcrypt with salt rounds 10
+- **JWT**: 24h expiration with refresh token
+- **Webhook signature**: Webhook signature verification (X-PAYMENT-SIGNATURE)
+- **CORS**: Properly configured CORS headers for cross-origin requests
+- **Database**: Isolated Docker containers
+- **Environment variables**: Configuration through .env in each application
+- **SQL Injection**: Protection through Prisma ORM
 
-## 📊 Statusy faktur
+## 📊 Invoice Statuses
 
-- **draft** (żółty): Faktura utworzona, czeka na generowanie PDF
-- **sent** (niebieski): PDF wygenerowany, email wysłany
-- **paid** (zielony): Płatność zrealizowana
+- **draft** (yellow): Invoice created, waiting for PDF generation
+- **sent** (blue): PDF generated, email sent
+- **paid** (green): Payment completed
 
-## 📞 Wsparcie
+## 📞 Support
 
-W przypadku problemów:
-1. Sprawdź logi: `docker-compose logs`
-2. Restart kontenerów: `docker-compose restart`
-3. Reset bazy: `docker-compose down -v && docker-compose up -d`
-4. Sprawdź status aplikacji: `npm run dev`
-5. Sprawdź RabbitMQ: http://localhost:15672
-6. Sprawdź bazy danych: `docker-compose exec postgres psql -U invoices_user -d invoices_db`
-7. Sprawdź testy: `npm test` 
+In case of issues:
+1. Check logs: `docker-compose logs`
+2. Restart containers: `docker-compose restart`
+3. Reset database: `docker-compose down -v && docker-compose up -d`
+4. Check application status: `npm run dev`
+5. Check RabbitMQ: http://localhost:15672
+6. Check database: `docker-compose exec postgres psql -U invoices_user -d invoices_db`
+7. Check tests: `npm test` 
