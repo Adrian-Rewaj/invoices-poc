@@ -1,10 +1,10 @@
 # Email Worker - Sending Emails with Invoices
 
-Express.js worker for automatically sending emails with attached PDF invoices.
+Nest.js worker for automatically sending emails with attached PDF invoices.
 
 ## 🚀 Description
 
-Email Worker is an Express.js application that:
+Email Worker is an Nest.js application that:
 - Listens to `invoice.send` events from RabbitMQ
 - Retrieves invoice and client data from database
 - Sends email with attached PDF invoice
@@ -13,7 +13,7 @@ Email Worker is an Express.js application that:
 
 ## 🛠️ Technologies
 
-- **Express.js** - Node.js framework
+- **Nest.js** - Node.js framework
 - **TypeScript** - Type safety
 - **nodemailer** - Email sending
 - **RabbitMQ** - Event-driven communication
