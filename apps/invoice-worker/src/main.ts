@@ -42,12 +42,15 @@ async function bootstrap() {
 
       worker.on('message', async (pdfFileName) => {
         try {
-          // Aktualizuj bazę danych z nazwą pliku PDF
+          // Aktualizuj bazę danych z nazwą pliku PDF i statusem "generated"
           await prisma.invoice.update({
             where: { id: invoiceData.invoiceId || invoiceData.id },
-            data: { pdfFileName }
+            data: { 
+              pdfFileName,
+              status: 'generated'
+            }
           });
-          console.log(` [✓] Invoice ${invoiceData.invoiceId || invoiceData.id} pdfFileName updated to '${pdfFileName}'`);
+          console.log(` [✓] Invoice ${invoiceData.invoiceId || invoiceData.id} pdfFileName updated to '${pdfFileName}' and status set to 'generated'`);
           
           // Po wygenerowaniu PDF wyślij do invoice.send
           const sendData = { ...invoiceData, pdfFileName };

@@ -37,7 +37,7 @@ model Invoice {
   invoiceNumber String @unique
   data      Json     // Szczegółowe dane faktury
   pdfFileName String? // Nazwa pliku PDF (generowana przez inną aplikację)
-  status    String   @default("draft") // draft, sent, paid, overdue
+  status    String   @default("draft") // draft, generated, sent, paid, overdue
   payToken  String   @unique // Token do płatności
 }
 
