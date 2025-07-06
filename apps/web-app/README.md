@@ -172,7 +172,7 @@ web-app/
 
 ### Invoice Statuses
 - **draft** (yellow): Invoice created
-- **sent** (blue): PDF generated, email sent
+- **sent** (blue): email sent
 - **paid** (green): Payment completed
 
 ## 🔗 Integrations
