@@ -213,7 +213,7 @@ npm run docker:logs
 
 - **draft** (yellow): Invoice created, waiting for PDF generation
 - **generated** (orange): PDF generated, waiting for email sending
-- **sent** (blue): PDF generated, email sent
+- **sent** (blue): email sent
 - **paid** (green): Payment completed
 
 ## 📞 Support
