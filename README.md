@@ -102,7 +102,7 @@ invoices-poc/
 
 ### ✅ Implemented
 - **JWT Authentication**: Login with bcrypt password
-- **Dashboard**: List of clients and invoices with statuses (draft, sent, paid)
+- **Dashboard**: List of clients and invoices with statuses (draft, generated, sent, paid)
 - **Client Management**: Adding and editing clients with change history
 - **Invoice Management**: Creating invoices with items in modal editor
 - **PDF Generation**: Automatic invoice PDF generation with Polish characters (DejaVu Sans)
@@ -191,12 +191,13 @@ npm run docker:logs
 1. **Invoice Creation**: User creates invoice in web-app with items
 2. **Event invoice.created**: Web-app publishes event to RabbitMQ with invoice data
 3. **PDF Generation**: invoice-worker receives event and generates PDF with Polish characters
-4. **Event invoice.send**: invoice-worker publishes event with generated PDF filename
-5. **Email Sending**: email-worker receives event and sends email with PDF and payment link
-6. **Status Update**: email-worker updates invoice status to "sent"
-7. **Payment**: User clicks link in email and pays through pay-mock
-8. **Webhook**: pay-mock sends webhook to web-app with signature
-9. **Status "paid"**: Web-app verifies signature and updates invoice status to "paid"
+4. **Status "generated"**: invoice-worker updates invoice status to "generated" after PDF creation
+5. **Event invoice.send**: invoice-worker publishes event with generated PDF filename
+6. **Email Sending**: email-worker receives event and sends email with PDF and payment link
+7. **Status "sent"**: email-worker updates invoice status to "sent"
+8. **Payment**: User clicks link in email and pays through pay-mock
+9. **Webhook**: pay-mock sends webhook to web-app with signature
+10. **Status "paid"**: Web-app verifies signature and updates invoice status to "paid"
 
 ## 🔐 Security
 
@@ -211,6 +212,7 @@ npm run docker:logs
 ## 📊 Invoice Statuses
 
 - **draft** (yellow): Invoice created, waiting for PDF generation
+- **generated** (orange): PDF generated, waiting for email sending
 - **sent** (blue): PDF generated, email sent
 - **paid** (green): Payment completed
 
