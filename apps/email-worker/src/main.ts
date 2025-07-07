@@ -15,6 +15,7 @@ const SMTP_PORT = parseInt(process.env.SMTP_PORT || '1025');
 const SMTP_USER = process.env.SMTP_USER || '';
 const SMTP_PASS = process.env.SMTP_PASS || '';
 const SMTP_FROM = process.env.SMTP_FROM || 'faktury@twojafirma.pl';
+const EMAIL_WORKER_RABBITMQ_CHANNEL_PREFETCH = parseInt(process.env.EMAIL_WORKER_RABBITMQ_CHANNEL_PREFETCH || '3', 10);
 
 const prisma = new PrismaClient();
 
@@ -28,6 +29,8 @@ const transporter = nodemailer.createTransport({
 async function main() {
   const conn = await amqp.connect(RABBITMQ_URL);
   const channel = await conn.createChannel();
+  channel.prefetch(EMAIL_WORKER_RABBITMQ_CHANNEL_PREFETCH);
+
   await channel.assertQueue('invoice.send', { durable: true });
   console.log(' [*] Waiting for messages in invoice.send. To exit press CTRL+C');
 

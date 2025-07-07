@@ -10,6 +10,9 @@ const RABBITMQ_URL = process.env.RABBITMQ_URL || 'amqp://localhost:5672';
 const PDF_STORAGE_PATH = process.env.PDF_STORAGE_PATH || path.resolve(__dirname, '../../storage/pdfs');
 const prisma = new PrismaClient();
 
+const INVOICE_WORKER_RABBITMQ_CHANNEL_PREFETCH = parseInt(process.env.INVOICE_WORKER_RABBITMQ_CHANNEL_PREFETCH || '3', 10);
+const INVOICE_WORKER_THREADS_LIMIT = parseInt(process.env.INVOICE_WORKER_THREADS_LIMIT || '3', 10);
+
 async function bootstrap() {
   console.log(' [*] Connecting to RabbitMQ:', RABBITMQ_URL);
   const conn = await amqp.connect(RABBITMQ_URL);
@@ -17,6 +20,9 @@ async function bootstrap() {
   
   const channel = await conn.createChannel();
   console.log(' [*] Channel created');
+
+  // Ustaw prefetch
+  channel.prefetch(INVOICE_WORKER_RABBITMQ_CHANNEL_PREFETCH);
 
   // Exchange i binding
   const exchange = 'invoices';
@@ -29,8 +35,17 @@ async function bootstrap() {
 
   console.log(' [*] Waiting for messages in invoice.created. To exit press CTRL+C');
 
+  let activeWorkers = 0;
+
   channel.consume(q.queue, async (msg) => {
     if (msg) {
+      if (activeWorkers >= INVOICE_WORKER_THREADS_LIMIT) {
+        // Osiągnięto limit wątków, requeue wiadomość i poczekaj
+        console.warn(' [!] Worker thread limit reached, requeueing message');
+        channel.nack(msg, false, true); // requeue
+        return;
+      }
+      activeWorkers++;
       console.log(' [x] Received invoice.created message');
       const invoiceData = JSON.parse(msg.content.toString());
       console.log(' [x] Received invoice.created:', invoiceData);
@@ -66,9 +81,11 @@ async function bootstrap() {
       });
 
       worker.on('exit', (code) => {
+        activeWorkers--;
         if (code !== 0) {
           console.error(`PDF worker stopped with exit code ${code}`);
         }
+        // Potencjalnie można tu dodać logikę do ponownego pobrania wiadomości jeśli worker się wywalił
       });
 
       channel.ack(msg);
