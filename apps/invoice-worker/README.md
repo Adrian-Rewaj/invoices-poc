@@ -175,3 +175,13 @@ In case of issues:
 3. Check storage: `ls -la storage/pdfs/`
 4. Check database: `npx prisma studio`
 5. Reset: `npm run clean && npm install`
+
+## 📂 Required directories
+
+Before running the worker, make sure the following directory exists:
+
+```bash
+mkdir -p storage/pdfs/
+```
+
+This is where generated PDF invoices will be saved.
