@@ -6,6 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
+    "start:debug": "NODE_OPTIONS='--inspect=9229' next dev",
     "lint": "next lint",
     "test": "jest",
     "test:watch": "jest --watch",
