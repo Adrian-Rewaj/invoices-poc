@@ -36,18 +36,21 @@
     "db:reset": "cd apps/web-app && npx prisma migrate reset",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "turbo run build && changeset publish"
+    "release": "turbo run build && changeset publish",
+    "start:debug": "concurrently -k -n web,invoice,email,pay 'npm run start:debug --workspace=apps/web-app' 'npm run start:debug --workspace=apps/invoice-worker' 'npm run start:debug --workspace=apps/email-worker' 'npm run start:debug --workspace=apps/pay-mock'"
   },
   "devDependencies": {
-    "turbo": "^1.10.16",
+    "@isaacs/brace-expansion": "^5.0.0",
     "@types/node": "^20.8.0",
-    "typescript": "^5.2.0",
+    "concurrently": "^9.2.0",
     "eslint": "^8.51.0",
-    "prettier": "^3.0.3"
+    "prettier": "^3.0.3",
+    "turbo": "^1.10.16",
+    "typescript": "^5.2.0"
   },
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=8.0.0"
   },
   "packageManager": "npm@10.2.4"
-} 
+}
