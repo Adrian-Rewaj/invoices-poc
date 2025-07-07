@@ -15,26 +15,26 @@ function generateInvoicePDF(invoice: any, pdfPath: string, cb: (fileName: string
   const stream = fs.createWriteStream(filePath);
   doc.pipe(stream);
 
-  // Użyj fontu z polskimi znakami
+  // Use font with Polish characters
   doc.registerFont('dejavu', path.resolve(__dirname, '../../../assets/DejaVuSans.ttf'));
   doc.font('dejavu');
 
-  // Nagłówek
-  doc.fontSize(20).text(`FAKTURA VAT`, { align: 'center' });
+  // Header
+  doc.fontSize(20).text(`VAT INVOICE`, { align: 'center' });
   doc.moveDown(0.5);
-  doc.fontSize(12).text(`Nr: ${invoice.invoiceNumber || ''}`, { align: 'center' });
+  doc.fontSize(12).text(`No: ${invoice.invoiceNumber || ''}`, { align: 'center' });
   doc.moveDown(1.5);
 
-  // Dane sprzedawcy i nabywcy w dwóch kolumnach
+  // Seller and buyer data in two columns
   const seller = [
-    'Sprzedawca:',
+    'Seller:',
     'Twoja Firma Sp. z o.o.',
     'ul. Przykładowa 123, 00-000 Warszawa',
     'NIP: 123-456-78-90',
     'Email: faktury@twojafirma.pl',
   ];
   const buyer = [
-    'Nabywca:',
+    'Buyer:',
     invoice.client?.name || '',
     `Email: ${invoice.client?.email || ''}`,
     `NIP: ${invoice.client?.nip || ''}`,
@@ -44,19 +44,19 @@ function generateInvoicePDF(invoice: any, pdfPath: string, cb: (fileName: string
   doc.fontSize(12).text(buyer.join('\n'), 320, startY);
   doc.moveDown(5);
 
-  // Daty
-  doc.fontSize(11).text(`Data wystawienia: ${invoice.issueDate ? new Date(invoice.issueDate).toLocaleDateString('pl-PL') : ''}`);
-  doc.fontSize(11).text(`Termin płatności: ${invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString('pl-PL') : ''}`);
+  // Dates
+  doc.fontSize(11).text(`Issue date: ${invoice.issueDate ? new Date(invoice.issueDate).toLocaleDateString('pl-PL') : ''}`);
+  doc.fontSize(11).text(`Due date: ${invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString('pl-PL') : ''}`);
   doc.moveDown(1.5);
 
-  // Tabelka z pozycjami
+  // Table with items
   const tableTop = doc.y;
   const itemCols = [40, 70, 270, 320, 370, 440]; // x positions
-  doc.fontSize(12).text('Lp.', itemCols[0], tableTop, { width: 30, align: 'center' });
-  doc.text('Nazwa', itemCols[1], tableTop, { width: 200 });
-  doc.text('Ilość', itemCols[2], tableTop, { width: 50, align: 'right' });
-  doc.text('Cena', itemCols[3], tableTop, { width: 50, align: 'right' });
-  doc.text('Wartość', itemCols[4], tableTop, { width: 70, align: 'right' });
+  doc.fontSize(12).text('No.', itemCols[0], tableTop, { width: 30, align: 'center' });
+  doc.text('Name', itemCols[1], tableTop, { width: 200 });
+  doc.text('Quantity', itemCols[2], tableTop, { width: 50, align: 'right' });
+  doc.text('Price', itemCols[3], tableTop, { width: 50, align: 'right' });
+  doc.text('Value', itemCols[4], tableTop, { width: 70, align: 'right' });
   doc.moveDown(0.5);
   doc.moveTo(40, doc.y).lineTo(540, doc.y).stroke();
 
@@ -73,25 +73,25 @@ function generateInvoicePDF(invoice: any, pdfPath: string, cb: (fileName: string
   doc.moveTo(40, y).lineTo(540, y).stroke();
   y += 10;
 
-  // Podsumowanie
-  doc.fontSize(12).text(`Wartość netto: ${(invoice.data?.subtotal || 0).toFixed(2)} zł`, 370, y);
+  // Summary
+  doc.fontSize(12).text(`Net value: ${(invoice.data?.subtotal || 0).toFixed(2)} zł`, 370, y);
   y += 16;
   doc.text(`VAT (${invoice.data?.vatRate || 23}%): ${(invoice.data?.vatAmount || 0).toFixed(2)} zł`, 370, y);
   y += 16;
-  doc.fontSize(14).text(`Razem: ${(invoice.data?.total || 0).toFixed(2)} zł`, 370, y, { bold: true });
+  doc.fontSize(14).text(`Total: ${(invoice.data?.total || 0).toFixed(2)} zł`, 370, y, { bold: true });
   y += 24;
 
-  // Uwagi
+  // Notes
   if (invoice.data?.notes) {
-    doc.fontSize(11).text(`Uwagi: ${invoice.data.notes}`, 40, y);
+    doc.fontSize(11).text(`Notes: ${invoice.data.notes}`, 40, y);
     y += 18;
   }
 
-  // Dane do przelewu
+  // Bank transfer details
   doc.moveDown(2);
-  doc.fontSize(12).text('Dane do przelewu:', { underline: true });
+  doc.fontSize(12).text('Bank transfer details:', { underline: true });
   doc.text('Bank: Przykładowy Bank S.A.');
-  doc.text('Nr konta: 12 1234 5678 9012 3456 7890 1234');
+  doc.text('Account number: 12 1234 5678 9012 3456 7890 1234');
   doc.text('SWIFT: PRZAPLXX');
   doc.text('IBAN: PL12 1234 5678 9012 3456 7890 1234');
 
