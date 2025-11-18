@@ -6,7 +6,7 @@ Modern invoice system built as a monorepo with four JavaScript applications:
 - **email-worker** (Nest.js) - Worker for sending emails
 - **pay-mock** (Express.js) - Mock application for payment simulation
 
-![Application Dashboard](assets/screen.png)
+![Application Dashboard](assets/dashboard_screen.png)
 
 ## 🚀 Quick Start
 
