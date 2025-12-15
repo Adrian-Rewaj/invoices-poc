@@ -8,14 +8,21 @@ import { PrismaClient } from '@prisma/client';
 dotenv.config();
 
 const RABBITMQ_URL = process.env.RABBITMQ_URL || 'amqp://localhost:5672';
-const PDF_STORAGE_PATH = process.env.PDF_STORAGE_PATH || path.resolve(__dirname, '../../../storage/pdfs');
+const RABBITMQ_INVOICE_SEND_QUEUE_NAME =
+  process.env.RABBITMQ_INVOICE_SEND_QUEUE_NAME || 'invoice.send';
+const PDF_STORAGE_PATH =
+  process.env.PDF_STORAGE_PATH ||
+  path.resolve(__dirname, '../../../storage/pdfs');
 
 const SMTP_HOST = process.env.SMTP_HOST || 'localhost';
 const SMTP_PORT = parseInt(process.env.SMTP_PORT || '1025');
 const SMTP_USER = process.env.SMTP_USER || '';
 const SMTP_PASS = process.env.SMTP_PASS || '';
 const SMTP_FROM = process.env.SMTP_FROM || 'faktury@twojafirma.pl';
-const EMAIL_WORKER_RABBITMQ_CHANNEL_PREFETCH = parseInt(process.env.EMAIL_WORKER_RABBITMQ_CHANNEL_PREFETCH || '3', 10);
+const EMAIL_WORKER_RABBITMQ_CHANNEL_PREFETCH = parseInt(
+  process.env.EMAIL_WORKER_RABBITMQ_CHANNEL_PREFETCH || '3',
+  10,
+);
 
 const prisma = new PrismaClient();
 
@@ -31,10 +38,14 @@ async function main() {
   const channel = await conn.createChannel();
   channel.prefetch(EMAIL_WORKER_RABBITMQ_CHANNEL_PREFETCH);
 
-  await channel.assertQueue('invoice.send', { durable: true });
-  console.log(' [*] Waiting for messages in invoice.send. To exit press CTRL+C');
+  await channel.assertQueue(RABBITMQ_INVOICE_SEND_QUEUE_NAME, {
+    durable: true,
+  });
+  console.log(
+    ' [*] Waiting for messages in invoice.send. To exit press CTRL+C',
+  );
 
-  channel.consume('invoice.send', async (msg) => {
+  channel.consume(RABBITMQ_INVOICE_SEND_QUEUE_NAME, async (msg) => {
     if (msg) {
       const data = JSON.parse(msg.content.toString());
       console.log(' [x] Received invoice.send:', data);
@@ -58,18 +69,20 @@ async function main() {
         };
         await transporter.sendMail(mailOptions);
         console.log(' [>] E-mail sent to', mailOptions.to);
-        
+
         // Aktualizuj status faktury z "draft" na "sent"
         const invoiceId = data.id || data.invoiceId;
         if (invoiceId) {
           await prisma.invoice.update({
             where: { id: invoiceId },
-            data: { 
+            data: {
               status: 'sent',
-              pdfFileName: data.pdfFileName
-            }
+              pdfFileName: data.pdfFileName,
+            },
           });
-          console.log(` [✓] Invoice ${invoiceId} status updated to 'sent' and pdfFileName set to '${data.pdfFileName}'`);
+          console.log(
+            ` [✓] Invoice ${invoiceId} status updated to 'sent' and pdfFileName set to '${data.pdfFileName}'`,
+          );
         }
       } catch (err) {
         console.error('E-mail worker error:', err);

@@ -7,17 +7,29 @@ import { PrismaClient } from '@prisma/client';
 dotenv.config();
 
 const RABBITMQ_URL = process.env.RABBITMQ_URL || 'amqp://localhost:5672';
-const PDF_STORAGE_PATH = process.env.PDF_STORAGE_PATH || path.resolve(__dirname, '../../storage/pdfs');
+const RABBITMQ_INVOICE_CREATED_QUEUE_NAME =
+  process.env.RABBITMQ_INVOICE_CREATED_QUEUE_NAME || 'invoice.created';
+const RABBITMQ_INVOICE_SEND_QUEUE_NAME =
+  process.env.RABBITMQ_INVOICE_SEND_QUEUE_NAME || 'invoice.send';
+const RABBITMQ_EXCHANGE_NAME = process.env.RABBITMQ_EXCHANGE_NAME || 'invoices';
+const PDF_STORAGE_PATH =
+  process.env.PDF_STORAGE_PATH || path.resolve(__dirname, '../../storage/pdfs');
 const prisma = new PrismaClient();
 
-const INVOICE_WORKER_RABBITMQ_CHANNEL_PREFETCH = parseInt(process.env.INVOICE_WORKER_RABBITMQ_CHANNEL_PREFETCH || '3', 10);
-const INVOICE_WORKER_THREADS_LIMIT = parseInt(process.env.INVOICE_WORKER_THREADS_LIMIT || '3', 10);
+const INVOICE_WORKER_RABBITMQ_CHANNEL_PREFETCH = parseInt(
+  process.env.INVOICE_WORKER_RABBITMQ_CHANNEL_PREFETCH || '3',
+  10,
+);
+const INVOICE_WORKER_THREADS_LIMIT = parseInt(
+  process.env.INVOICE_WORKER_THREADS_LIMIT || '3',
+  10,
+);
 
 async function bootstrap() {
   console.log(' [*] Connecting to RabbitMQ:', RABBITMQ_URL);
   const conn = await amqp.connect(RABBITMQ_URL);
   console.log(' [*] Connected to RabbitMQ successfully');
-  
+
   const channel = await conn.createChannel();
   console.log(' [*] Channel created');
 
@@ -25,15 +37,25 @@ async function bootstrap() {
   channel.prefetch(INVOICE_WORKER_RABBITMQ_CHANNEL_PREFETCH);
 
   // Exchange and binding
-  const exchange = 'invoices';
-  const routingKey = 'invoice.created';
-  await channel.assertExchange(exchange, 'topic', { durable: true });
-  const q = await channel.assertQueue(routingKey, { durable: true });
-  await channel.bindQueue(q.queue, exchange, routingKey);
-  await channel.assertQueue('invoice.send', { durable: true });
+  await channel.assertExchange(RABBITMQ_EXCHANGE_NAME, 'topic', {
+    durable: true,
+  });
+  const q = await channel.assertQueue(RABBITMQ_INVOICE_CREATED_QUEUE_NAME, {
+    durable: true,
+  });
+  await channel.bindQueue(
+    q.queue,
+    RABBITMQ_EXCHANGE_NAME,
+    RABBITMQ_INVOICE_CREATED_QUEUE_NAME,
+  );
+  await channel.assertQueue(RABBITMQ_INVOICE_SEND_QUEUE_NAME, {
+    durable: true,
+  });
   console.log(' [*] Exchange, queues and bindings asserted');
 
-  console.log(' [*] Waiting for messages in invoice.created. To exit press CTRL+C');
+  console.log(
+    ' [*] Waiting for messages in invoice.created. To exit press CTRL+C',
+  );
 
   let activeWorkers = 0;
 
@@ -60,15 +82,21 @@ async function bootstrap() {
           // Update database with PDF file name and status "generated"
           await prisma.invoice.update({
             where: { id: invoiceData.invoiceId || invoiceData.id },
-            data: { 
+            data: {
               pdfFileName,
-              status: 'generated'
-            }
+              status: 'generated',
+            },
           });
-          console.log(` [✓] Invoice ${invoiceData.invoiceId || invoiceData.id} pdfFileName updated to '${pdfFileName}' and status set to 'generated'`);
+          console.log(
+            ` [✓] Invoice ${invoiceData.invoiceId || invoiceData.id} pdfFileName updated to '${pdfFileName}' and status set to 'generated'`,
+          );
           // After PDF is generated, send to invoice.send
           const sendData = { ...invoiceData, pdfFileName };
-          channel.sendToQueue('invoice.send', Buffer.from(JSON.stringify(sendData)), { persistent: true });
+          channel.sendToQueue(
+            RABBITMQ_INVOICE_SEND_QUEUE_NAME,
+            Buffer.from(JSON.stringify(sendData)),
+            { persistent: true },
+          );
           console.log(' [>] Sent invoice.send:', sendData);
         } catch (error) {
           console.error('Error updating invoice with PDF filename:', error);
@@ -92,7 +120,7 @@ async function bootstrap() {
   });
 }
 
-bootstrap().catch(err => {
+bootstrap().catch((err) => {
   console.error('Bootstrap error:', err);
   process.exit(1);
 });

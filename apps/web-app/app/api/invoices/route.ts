@@ -3,8 +3,15 @@ import { prisma } from '@/lib/prisma';
 import { publishEvent } from '../../../lib/rabbitmq';
 import { getUserFromRequest } from '@/lib/auth';
 import { withSecurityHeaders, handleOptions } from '../../../lib/cors';
-import { generateInvoiceNumber, getCompanyData, getBankData, calculateInvoiceTotals, type InvoiceData, type InvoiceItem } from '../../../lib/invoice';
+import {
+  generateInvoiceNumber,
+  calculateInvoiceTotals,
+  type InvoiceData,
+  type InvoiceItem,
+} from '../../../lib/invoice';
 import { v4 as uuidv4 } from 'uuid';
+
+const RABBITMQ_QUEUE_NAME = process.env.RABBITMQ_QUEUE_NAME || 'invoice.created';
 
 export async function OPTIONS(request: NextRequest) {
   return handleOptions(request);
@@ -29,10 +36,7 @@ export async function GET() {
   } catch (error) {
     console.error('Error fetching invoices:', error);
     return withSecurityHeaders(
-      NextResponse.json(
-        { error: 'Internal server error' },
-        { status: 500 }
-      )
+      NextResponse.json({ error: 'Internal server error' }, { status: 500 }),
     );
   }
 }
@@ -42,12 +46,7 @@ export async function POST(request: NextRequest) {
     // Sprawdź autoryzację
     const user = await getUserFromRequest(request);
     if (!user) {
-      return withSecurityHeaders(
-        NextResponse.json(
-          { error: 'Unauthorized' },
-          { status: 401 }
-        )
-      );
+      return withSecurityHeaders(NextResponse.json({ error: 'Unauthorized' }, { status: 401 }));
     }
 
     const body = await request.json();
@@ -58,10 +57,7 @@ export async function POST(request: NextRequest) {
 
     if (!clientId) {
       return withSecurityHeaders(
-        NextResponse.json(
-          { error: 'Client ID is required' },
-          { status: 400 }
-        )
+        NextResponse.json({ error: 'Client ID is required' }, { status: 400 }),
       );
     }
 
@@ -71,17 +67,12 @@ export async function POST(request: NextRequest) {
     });
 
     if (!client) {
-      return withSecurityHeaders(
-        NextResponse.json(
-          { error: 'Client not found' },
-          { status: 404 }
-        )
-      );
+      return withSecurityHeaders(NextResponse.json({ error: 'Client not found' }, { status: 404 }));
     }
 
     // Generuj numer faktury
     const invoiceNumber = await generateInvoiceNumber();
-    
+
     // Ustaw datę płatności (30 dni od dziś)
     const dueDate = new Date();
     dueDate.setDate(dueDate.getDate() + 30);
@@ -126,7 +117,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Publish event to RabbitMQ
-    await publishEvent('invoice.created', {
+    await publishEvent(RABBITMQ_QUEUE_NAME, {
       invoiceId: invoice.id,
       clientId: invoice.clientId,
       userId: invoice.userId,
@@ -142,10 +133,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error creating invoice:', error);
     return withSecurityHeaders(
-      NextResponse.json(
-        { error: 'Internal server error' },
-        { status: 500 }
-      )
+      NextResponse.json({ error: 'Internal server error' }, { status: 500 }),
     );
   }
-} 
+}
