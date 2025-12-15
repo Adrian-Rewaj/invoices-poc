@@ -158,7 +158,7 @@ jobs:
         run: npm ci
 
       - name: Setup Turborepo cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .turbo
           key: ${{ runner.os }}-turbo-${{ github.sha }}
