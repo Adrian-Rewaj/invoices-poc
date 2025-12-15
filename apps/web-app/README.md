@@ -7,6 +7,7 @@ Main Next.js application of the invoice system with user interface.
 ## 🚀 Description
 
 Web App is the main application of the invoice system that provides:
+
 - **Dashboard** with list of clients and invoices
 - **JWT Authentication** with secure login
 - **Client Management** with change history
@@ -63,6 +64,7 @@ npm run test:e2e:ui
 ```
 
 ### Test types
+
 - **Unit Tests**: Function and component tests (`__tests__/unit/`)
 - **Integration Tests**: API endpoint tests (`__tests__/integration/`)
 - **E2E Tests**: Full application flow tests (`tests/e2e/`)
@@ -72,9 +74,10 @@ More information: [TESTING.md](./TESTING.md)
 ## 🔧 Configuration
 
 ### Environment variables (.env)
+
 ```env
 # Database
-DATABASE_URL="postgresql://invoices_user:invoices_password@localhost:5433/invoices_db"
+DATABASE_URL="postgresql://invoices_user:invoices_password@localhost:5432/invoices_db"
 
 # JWT
 JWT_SECRET="your-secret-key"
@@ -126,20 +129,24 @@ web-app/
 ## 🔄 API Endpoints
 
 ### Authentication
+
 - `POST /api/auth/login` - User login
 
 ### Clients
+
 - `GET /api/clients` - Client list
 - `POST /api/clients` - Add new client
 - `PUT /api/clients/[id]` - Edit client with history
 
 ### Invoices
+
 - `GET /api/invoices` - Invoice list
 - `POST /api/invoices` - Create new invoice
 - `GET /api/invoices/[id]/pdf` - Download PDF
 - `GET /api/invoices/by-token/[token]` - Invoice by token
 
 ### Payments
+
 - `POST /api/payments/webhook` - Webhook with signature verification
 
 ## 🔐 Security
@@ -153,24 +160,28 @@ web-app/
 ## 📊 Features
 
 ### Dashboard
+
 - Client list with add/edit capabilities
 - Invoice list with statuses (draft, sent, paid)
 - PDF invoice download
 - Invoice details preview
 
 ### Client Management
+
 - Adding new clients
 - Editing client data
 - Change history with timestamps
 - Data validation
 
 ### Invoice Creation
+
 - Modal invoice item editor
 - Automatic amount calculations
 - Data validation
 - Publishing events to RabbitMQ
 
 ### Invoice Statuses
+
 - **draft** (yellow): Invoice created
 - **sent** (blue): email sent
 - **paid** (green): Payment completed
@@ -198,6 +209,7 @@ docker run -p 3001:3001 web-app
 ## 📞 Support
 
 In case of issues:
+
 1. Check logs: `npm run dev`
 2. Check database: `npx prisma studio`
 3. Check RabbitMQ: http://localhost:15672

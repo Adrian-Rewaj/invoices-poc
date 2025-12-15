@@ -5,6 +5,7 @@ Nest.js worker for automatically generating PDF invoices with Polish characters.
 ## 🚀 Description
 
 Invoice Worker is a Nest.js application that:
+
 - Listens to `invoice.created` events from RabbitMQ
 - Generates PDF invoice with Polish characters (DejaVu Sans)
 - Saves PDF in storage/pdfs/
@@ -39,9 +40,10 @@ npm run build
 ## 🔧 Configuration
 
 ### Environment variables (.env)
+
 ```env
 # Database
-DATABASE_URL="postgresql://invoices_user:invoices_password@localhost:5433/invoices_db"
+DATABASE_URL="postgresql://invoices_user:invoices_password@localhost:5432/invoices_db"
 
 # RabbitMQ
 RABBITMQ_URL="amqp://invoices_user:invoices_password@localhost:5672"
@@ -86,6 +88,7 @@ invoice-worker/
 ## 📄 PDF Generation
 
 ### Features
+
 - **Polish characters**: Uses DejaVu Sans font for Polish characters
 - **Layout**: Professional invoice layout with logo
 - **Client data**: Full client and invoice data
@@ -94,6 +97,7 @@ invoice-worker/
 - **Filenames**: Safe filenames without special characters
 
 ### PDF example
+
 ```
 ┌─────────────────────────────────────┐
 │           VAT INVOICE              │
@@ -124,14 +128,17 @@ invoice-worker/
 ## 🔗 Integrations
 
 ### RabbitMQ Events
+
 - **Receives**: `invoice.created` - New invoice to generate
 - **Publishes**: `invoice.send` - PDF generated, ready to send
 
 ### Database
+
 - **Read**: Retrieves invoice and client data
 - **Write**: Updates invoice with PDF name
 
 ### API
+
 - **Web-app**: Provides invoice data through Prisma ORM
 
 ## 🔐 Security
@@ -144,6 +151,7 @@ invoice-worker/
 ## 📊 Monitoring
 
 ### Logs
+
 ```bash
 # Check logs
 npm run start:dev
@@ -153,6 +161,7 @@ docker-compose logs rabbitmq
 ```
 
 ### Statuses
+
 - **Processing**: PDF generation in progress
 - **Success**: PDF generated successfully
 - **Error**: PDF generation error
@@ -170,6 +179,7 @@ docker run --env-file .env invoice-worker
 ## 📞 Support
 
 In case of issues:
+
 1. Check logs: `npm run start:dev`
 2. Check RabbitMQ: http://localhost:15672
 3. Check storage: `ls -la storage/pdfs/`

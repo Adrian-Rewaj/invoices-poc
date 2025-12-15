@@ -1,6 +1,7 @@
 # Invoice System - Monorepo - Proof Of Concept
 
 Modern invoice system built as a monorepo with four JavaScript applications:
+
 - **web-app** (Next.js) - Main application with user interface
 - **invoice-worker** (Nest.js) - Worker for generating PDF invoices
 - **email-worker** (Nest.js) - Worker for sending emails
@@ -11,6 +12,7 @@ Modern invoice system built as a monorepo with four JavaScript applications:
 ## 🚀 Quick Start
 
 ### Requirements
+
 - Node.js 18+
 - Docker and Docker Compose
 - npm
@@ -18,6 +20,7 @@ Modern invoice system built as a monorepo with four JavaScript applications:
 ### Setup
 
 1. **Cloning and installation**
+
 ```bash
 git clone <repository-url>
 cd invoices-poc
@@ -25,27 +28,36 @@ npm install
 ```
 
 2. **Environment setup**
+
 ```bash
 # Start all containers (PostgreSQL, RabbitMQ)
 npm run docker:up
+
+# DB migrations and create default user
+npm run db:generate
+npm run db:migrate
+npm run db:seed
 
 # Start all applications
 npm run dev
 ```
 
 3. **Application access**
+
 - **Main application**: http://localhost:3001
 - **Pay Mock**: http://localhost:3003
 - **RabbitMQ Management**: http://localhost:15672 (user: invoices_user, password: invoices_password)
 - **PostgreSQL**: localhost:5433
 
 ### Default login credentials
+
 - **Login**: dev
 - **Password**: dev
 
 ## 🧪 Testing
 
 ### Tests across the entire monorepo
+
 ```bash
 # All tests
 npm run test
@@ -58,6 +70,7 @@ npm run test:e2e
 ```
 
 ### Tests in individual applications
+
 ```bash
 # Web App
 cd apps/web-app && npm test
@@ -73,6 +86,7 @@ cd apps/pay-mock && npm test
 ```
 
 ### Test types
+
 - **Unit Tests**: Function and component tests
 - **Integration Tests**: API and integration tests
 - **E2E Tests**: Full application flow tests (Playwright)
@@ -101,6 +115,7 @@ invoices-poc/
 ## 🔧 Features
 
 ### ✅ Implemented
+
 - **JWT Authentication**: Login with bcrypt password
 - **Dashboard**: List of clients and invoices with statuses (draft, generated, sent, paid)
 - **Client Management**: Adding and editing clients with change history
@@ -114,6 +129,7 @@ invoices-poc/
 - **Testing**: Unit, integration and E2E tests
 
 ### 🔄 API Endpoints
+
 - `POST /api/auth/login` - User login
 - `GET /api/clients` - Client list
 - `POST /api/clients` - Add new client
@@ -125,6 +141,7 @@ invoices-poc/
 - `POST /api/payments/webhook` - Payment webhook with signature verification
 
 ### 🗄️ Database Model
+
 ```sql
 User (id, username, passwordHash, createdAt)
 Client (id, name, email, nip, createdAt)
@@ -135,10 +152,12 @@ ClientChangeLog (id, clientId, userId, changedAt, before, after, field)
 ## 🐳 Docker
 
 ### Containers
+
 - **PostgreSQL**: Database (port 5433)
 - **RabbitMQ**: Message broker (port 5672, management 15672)
 
 ### Docker Commands
+
 ```bash
 # Start
 docker-compose up -d
@@ -156,6 +175,7 @@ docker-compose logs -f
 ## 🛠️ Development
 
 ### npm Scripts
+
 ```bash
 # Start all applications in development mode
 npm run dev
@@ -181,6 +201,7 @@ npm run docker:logs
 ```
 
 ### Applications
+
 - **web-app** (port 3001): Next.js with TypeScript, Tailwind CSS, Prisma
 - **invoice-worker**: Nest.js worker for PDF generation with pdfkit
 - **email-worker**: Nest.js worker for sending emails with nodemailer
@@ -219,10 +240,11 @@ npm run docker:logs
 ## 📞 Support
 
 In case of issues:
+
 1. Check logs: `docker-compose logs`
 2. Restart containers: `docker-compose restart`
 3. Reset database: `docker-compose down -v && docker-compose up -d`
 4. Check application status: `npm run dev`
 5. Check RabbitMQ: http://localhost:15672
 6. Check database: `docker-compose exec postgres psql -U invoices_user -d invoices_db`
-7. Check tests: `npm test` 
+7. Check tests: `npm test`
