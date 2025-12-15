@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 async function main() {
-  // Tworzenie użytkownika
+  // Create user
   const hashedPassword = await bcrypt.hash('dev', 10);
   const user = await prisma.user.upsert({
     where: { username: 'dev' },
@@ -15,13 +15,13 @@ async function main() {
     },
   });
 
-  // Tworzenie klienta
+  // Create client
   const client = await prisma.client.upsert({
     where: { id: 1 },
     update: {},
     create: {
-      name: 'Przykładowy Klient',
-      email: 'klient@example.com',
+      name: 'Example Client',
+      email: 'client@example.com',
       nip: '1234567890',
     },
   });
@@ -36,4 +36,4 @@ main()
   })
   .finally(async () => {
     await prisma.$disconnect();
-  }); 
+  });
