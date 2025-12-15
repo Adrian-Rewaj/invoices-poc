@@ -9,10 +9,9 @@ services:
       POSTGRES_USER: invoices_user
       POSTGRES_PASSWORD: invoices_password
     ports:
-      - "5433:5432"
+      - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     networks:
       - invoices-network
 
@@ -23,8 +22,8 @@ services:
       RABBITMQ_DEFAULT_USER: invoices_user
       RABBITMQ_DEFAULT_PASS: invoices_password
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - '5672:5672'
+      - '15672:15672'
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     networks:
@@ -36,7 +35,7 @@ services:
       dockerfile: apps/web-app/Dockerfile
     container_name: invoices-web-app
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       - DATABASE_URL=postgresql://invoices_user:invoices_password@postgres:5432/invoices_db
       - RABBITMQ_URL=amqp://invoices_user:invoices_password@rabbitmq:5672
@@ -58,4 +57,4 @@ volumes:
 
 networks:
   invoices-network:
-    driver: bridge 
+    driver: bridge

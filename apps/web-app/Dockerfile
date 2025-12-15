@@ -1,4 +1,3 @@
-# --- Etap build ---
 FROM node:20-alpine AS builder
 WORKDIR /app
 COPY package.json turbo.json ./
@@ -8,7 +7,6 @@ COPY apps/web-app ./apps/web-app
 RUN npm install
 RUN npm run build --workspace=apps/web-app
 
-# --- Etap produkcyjny ---
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production

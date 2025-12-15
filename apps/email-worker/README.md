@@ -5,6 +5,7 @@ Nest.js worker for automatically sending emails with attached PDF invoices.
 ## 🚀 Description
 
 Email Worker is an Nest.js application that:
+
 - Listens to `invoice.send` events from RabbitMQ
 - Retrieves invoice and client data from database
 - Sends email with attached PDF invoice
@@ -39,9 +40,10 @@ npm run build
 ## 🔧 Configuration
 
 ### Environment variables (.env)
+
 ```env
 # Database
-DATABASE_URL="postgresql://invoices_user:invoices_password@localhost:5433/invoices_db"
+DATABASE_URL="postgresql://invoices_user:invoices_password@localhost:5432/invoices_db"
 
 # RabbitMQ
 RABBITMQ_URL="amqp://invoices_user:invoices_password@localhost:5672"
@@ -92,32 +94,37 @@ email-worker/
 ## 📧 Email Template
 
 ### HTML Template
+
 ```html
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Invoice {{invoiceNumber}}</title>
-</head>
-<body>
+  </head>
+  <body>
     <h2>Invoice {{invoiceNumber}}</h2>
     <p>Hello {{clientName}},</p>
     <p>Please find attached invoice {{invoiceNumber}}.</p>
     <p>Amount to pay: {{totalAmount}} zł</p>
     <p>Due date: {{dueDate}}</p>
-    
+
     <div style="margin: 20px 0;">
-        <a href="{{paymentUrl}}" style="background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
-            Pay now
-        </a>
+      <a
+        href="{{paymentUrl}}"
+        style="background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;"
+      >
+        Pay now
+      </a>
     </div>
-    
-    <p>Best regards,<br>Invoice System</p>
-</body>
+
+    <p>Best regards,<br />Invoice System</p>
+  </body>
 </html>
 ```
 
 ### Email example
+
 ```
 From: Invoice System <noreply@faktury.pl>
 To: client@example.com
@@ -142,17 +149,21 @@ Attachments:
 ## 🔗 Integrations
 
 ### RabbitMQ Events
+
 - **Receives**: `invoice.send` - PDF generated, ready to send
 
 ### Database
+
 - **Read**: Retrieves invoice, client and PDF filename data
 - **Write**: Updates invoice status to "sent"
 
 ### API
+
 - **Web-app**: Provides invoice data through Prisma ORM
 - **Pay-mock**: Generates payment link
 
 ### SMTP
+
 - **Gmail**: SMTP with OAuth2 authorization
 - **Others**: Any SMTP server
 
@@ -167,6 +178,7 @@ Attachments:
 ## 📊 Monitoring
 
 ### Logs
+
 ```bash
 # Check logs
 npm run dev
@@ -176,6 +188,7 @@ docker-compose logs rabbitmq
 ```
 
 ### Email statuses
+
 - **Pending**: Email in queue
 - **Sent**: Email sent successfully
 - **Failed**: Sending error
@@ -194,6 +207,7 @@ docker run --env-file .env email-worker
 ## 📞 Support
 
 In case of issues:
+
 1. Check logs: `npm run dev`
 2. Check RabbitMQ: http://localhost:15672
 3. Check SMTP: `telnet smtp.gmail.com 587`
@@ -203,6 +217,7 @@ In case of issues:
 ## 📧 SMTP Configuration
 
 ### Gmail
+
 ```env
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
@@ -211,6 +226,7 @@ SMTP_PASS=your-app-password
 ```
 
 ### Other servers
+
 ```env
 SMTP_HOST=smtp.example.com
 SMTP_PORT=587
