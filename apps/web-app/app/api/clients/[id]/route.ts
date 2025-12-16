@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getUserFromRequest } from '@/lib/auth';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../../auth/[...nextauth]/route';
 
 // GET /api/clients/[id] - pobierz dane klienta
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, context: { params: { id: string } }) {
+  const params = await context.params;
   const id = Number(params.id);
   if (isNaN(id)) {
     return NextResponse.json({ error: 'Invalid client id' }, { status: 400 });
@@ -19,18 +18,19 @@ export async function GET(
 }
 
 // PATCH /api/clients/[id] - edytuj klienta i loguj zmiany
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: NextRequest, context: { params: { id: string } }) {
+  const params = await context.params;
   const id = Number(params.id);
   if (isNaN(id)) {
     return NextResponse.json({ error: 'Invalid client id' }, { status: 400 });
   }
-  const user = await getUserFromRequest(req);
-  if (!user) {
+
+  const session = await getServerSession(authOptions);
+  if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+  const user = session.user;
+
   const client = await prisma.client.findUnique({ where: { id } });
   if (!client) {
     return NextResponse.json({ error: 'Client not found' }, { status: 404 });
@@ -44,7 +44,12 @@ export async function PATCH(
     updates.name = name;
   }
   if (email && email !== client.email) {
-    logs.push({ field: 'email', before: { email: client.email }, after: { email }, userId: user.id });
+    logs.push({
+      field: 'email',
+      before: { email: client.email },
+      after: { email },
+      userId: user.id,
+    });
     updates.email = email;
   }
   if (nip && nip !== client.nip) {
@@ -71,10 +76,8 @@ export async function PATCH(
 }
 
 // GET /api/clients/[id]/history - historia zmian klienta
-export async function GET_HISTORY(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET_HISTORY(req: NextRequest, context: { params: { id: string } }) {
+  const params = await context.params;
   const id = Number(params.id);
   if (isNaN(id)) {
     return NextResponse.json({ error: 'Invalid client id' }, { status: 400 });
@@ -85,4 +88,4 @@ export async function GET_HISTORY(
     include: { user: { select: { username: true } } },
   });
   return NextResponse.json(logs);
-} 
+}

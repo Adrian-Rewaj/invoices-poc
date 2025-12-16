@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { signOut, useSession } from 'next-auth/react';
 
 interface Client {
   id: number;
@@ -58,17 +59,15 @@ export default function DashboardPage() {
   const [editingInvoiceItems, setEditingInvoiceItems] = useState<any[]>([]);
   const [editingClientId, setEditingClientId] = useState<number | null>(null);
   const router = useRouter();
+  const { data: session, status } = useSession();
 
   useEffect(() => {
-    // Check if user is logged in
-    const token = localStorage.getItem('token');
-    if (!token) {
+    if (status === 'unauthenticated') {
       router.push('/login');
-      return;
     }
 
     fetchData();
-  }, [router]);
+  }, [status, router]);
 
   const fetchData = async () => {
     try {
@@ -96,17 +95,10 @@ export default function DashboardPage() {
   const handleAddClient = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        router.push('/login');
-        return;
-      }
-      
       const response = await fetch('/api/clients', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(newClient),
       });
@@ -117,8 +109,6 @@ export default function DashboardPage() {
         setNewClient({ name: '', email: '', nip: '' });
         setShowAddClient(false);
       } else if (response.status === 401) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
         router.push('/login');
       } else {
         const errorData = await response.json();
@@ -135,17 +125,17 @@ export default function DashboardPage() {
       {
         name: 'Consulting Service',
         quantity: 1,
-        unitPrice: 500.00,
-        total: 500.00,
-        description: 'IT consulting services'
+        unitPrice: 500.0,
+        total: 500.0,
+        description: 'IT consulting services',
       },
       {
         name: 'Subscription',
         quantity: 1,
-        unitPrice: 50.00,
-        total: 50.00,
-        description: 'Monthly subscription'
-      }
+        unitPrice: 50.0,
+        total: 50.0,
+        description: 'Monthly subscription',
+      },
     ];
 
     setEditingInvoiceItems(sampleItems);
@@ -160,7 +150,7 @@ export default function DashboardPage() {
     setShowEditModal(true);
     setEditError('');
     setEditLoading(false);
-    
+
     // Pobierz historię zmian
     try {
       const res = await fetch(`/api/clients/${client.id}/history`);
@@ -185,17 +175,10 @@ export default function DashboardPage() {
     setEditLoading(true);
     setEditError('');
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        router.push('/login');
-        return;
-      }
-      
       const res = await fetch(`/api/clients/${editClientId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(editForm),
       });
@@ -204,8 +187,6 @@ export default function DashboardPage() {
         setClients((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
         setShowEditModal(false);
       } else if (res.status === 401) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
         router.push('/login');
       } else {
         const data = await res.json();
@@ -219,8 +200,7 @@ export default function DashboardPage() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    signOut({ redirect: false });
     router.push('/login');
   };
 
@@ -231,17 +211,7 @@ export default function DashboardPage() {
 
   const handleDownloadPDF = async (invoice: Invoice) => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        router.push('/login');
-        return;
-      }
-
-      const response = await fetch(`/api/invoices/${invoice.id}/pdf`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(`/api/invoices/${invoice.id}/pdf`);
 
       if (response.ok) {
         const blob = await response.blob();
@@ -269,7 +239,7 @@ export default function DashboardPage() {
       quantity: 1,
       unitPrice: 0,
       total: 0,
-      description: ''
+      description: '',
     };
     setEditingInvoiceItems([...editingInvoiceItems, newItem]);
   };
@@ -282,12 +252,12 @@ export default function DashboardPage() {
   const handleUpdateInvoiceItem = (index: number, field: string, value: any) => {
     const newItems = [...editingInvoiceItems];
     newItems[index] = { ...newItems[index], [field]: value };
-    
+
     // Oblicz total dla pozycji
     if (field === 'quantity' || field === 'unitPrice') {
       newItems[index].total = newItems[index].quantity * newItems[index].unitPrice;
     }
-    
+
     setEditingInvoiceItems(newItems);
   };
 
@@ -295,17 +265,10 @@ export default function DashboardPage() {
     if (!editingClientId) return;
 
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        router.push('/login');
-        return;
-      }
-
       const response = await fetch('/api/invoices', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           clientId: editingClientId,
@@ -350,21 +313,38 @@ export default function DashboardPage() {
             <div className="flex items-center">
               <div className="flex-shrink-0 flex items-center">
                 <div className="h-7 w-7 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center mr-3">
-                  <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  <svg
+                    className="h-5 w-5 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
                   </svg>
                 </div>
                 <h1 className="text-lg sm:text-xl font-bold text-gray-900">Invoice System</h1>
               </div>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4">
-              <span className="text-xs sm:text-sm text-gray-600 hidden sm:block">Welcome, dev!</span>
+              <span className="text-xs sm:text-sm text-gray-600 hidden sm:block">
+                Welcome, dev!
+              </span>
               <button
                 onClick={handleLogout}
                 className="inline-flex items-center px-3 py-2 border border-transparent text-xs sm:text-sm font-medium rounded-lg text-white bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200"
               >
                 <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                  />
                 </svg>
                 Logout
               </button>
@@ -381,8 +361,18 @@ export default function DashboardPage() {
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <div className="w-7 h-7 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  <svg
+                    className="w-4 h-4 text-blue-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                    />
                   </svg>
                 </div>
               </div>
@@ -397,8 +387,18 @@ export default function DashboardPage() {
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <div className="w-7 h-7 bg-green-100 rounded-lg flex items-center justify-center">
-                  <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  <svg
+                    className="w-4 h-4 text-green-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
                   </svg>
                 </div>
               </div>
@@ -413,8 +413,18 @@ export default function DashboardPage() {
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <div className="w-7 h-7 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                  <svg
+                    className="w-4 h-4 text-purple-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
+                    />
                   </svg>
                 </div>
               </div>
@@ -432,8 +442,18 @@ export default function DashboardPage() {
             <div className="px-4 sm:px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-3 sm:space-y-0">
                 <h3 className="text-base sm:text-lg font-semibold text-gray-900 flex items-center">
-                  <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  <svg
+                    className="w-4 h-4 mr-2 text-blue-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                    />
                   </svg>
                   Clients
                 </h3>
@@ -441,8 +461,18 @@ export default function DashboardPage() {
                   onClick={() => setShowAddClient(!showAddClient)}
                   className="inline-flex items-center px-3 py-2 border border-transparent text-xs sm:text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
                 >
-                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  <svg
+                    className="w-4 h-4 mr-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                    />
                   </svg>
                   Add Client
                 </button>
@@ -458,9 +488,7 @@ export default function DashboardPage() {
                         type="text"
                         placeholder="Name"
                         value={newClient.name}
-                        onChange={(e) =>
-                          setNewClient({ ...newClient, name: e.target.value })
-                        }
+                        onChange={(e) => setNewClient({ ...newClient, name: e.target.value })}
                         className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                         required
                       />
@@ -468,9 +496,7 @@ export default function DashboardPage() {
                         type="email"
                         placeholder="Email"
                         value={newClient.email}
-                        onChange={(e) =>
-                          setNewClient({ ...newClient, email: e.target.value })
-                        }
+                        onChange={(e) => setNewClient({ ...newClient, email: e.target.value })}
                         className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                         required
                       />
@@ -478,9 +504,7 @@ export default function DashboardPage() {
                         type="text"
                         placeholder="NIP"
                         value={newClient.nip}
-                        onChange={(e) =>
-                          setNewClient({ ...newClient, nip: e.target.value })
-                        }
+                        onChange={(e) => setNewClient({ ...newClient, nip: e.target.value })}
                         className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                         required
                       />
@@ -512,7 +536,9 @@ export default function DashboardPage() {
                   >
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start space-y-3 sm:space-y-0">
                       <div className="flex-1">
-                        <h4 className="font-semibold text-gray-900 mb-1 text-sm sm:text-base">{client.name}</h4>
+                        <h4 className="font-semibold text-gray-900 mb-1 text-sm sm:text-base">
+                          {client.name}
+                        </h4>
                         <p className="text-xs sm:text-sm text-gray-600 mb-1">{client.email}</p>
                         <p className="text-xs text-gray-500">NIP: {client.nip}</p>
                       </div>
@@ -521,8 +547,18 @@ export default function DashboardPage() {
                           onClick={() => handleEditClick(client)}
                           className="inline-flex items-center px-3 py-2 border border-gray-300 text-xs sm:text-sm font-medium rounded-lg text-blue-700 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
                         >
-                          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536M9 13l6-6m2 2l-6 6m-2 2h2v2h2v-2h2v-2h-2v-2h-2v2H9v2z" />
+                          <svg
+                            className="w-4 h-4 mr-1"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15.232 5.232l3.536 3.536M9 13l6-6m2 2l-6 6m-2 2h2v2h2v-2h2v-2h-2v-2h-2v2H9v2z"
+                            />
                           </svg>
                           Edit
                         </button>
@@ -530,8 +566,18 @@ export default function DashboardPage() {
                           onClick={() => handleCreateInvoice(client.id)}
                           className="inline-flex items-center px-3 py-2 border border-transparent text-xs sm:text-sm font-medium rounded-lg text-white bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200"
                         >
-                          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                          <svg
+                            className="w-4 h-4 mr-1"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                            />
                           </svg>
                           Invoice
                         </button>
@@ -547,8 +593,18 @@ export default function DashboardPage() {
           <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
             <div className="px-4 sm:px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-green-50 to-emerald-50">
               <h3 className="text-base sm:text-lg font-semibold text-gray-900 flex items-center">
-                <svg className="w-4 h-4 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                <svg
+                  className="w-4 h-4 mr-2 text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
                 </svg>
                 Invoices
               </h3>
@@ -558,11 +614,23 @@ export default function DashboardPage() {
               <div className="space-y-3 sm:space-y-4">
                 {invoices.length === 0 ? (
                   <div className="text-center py-8">
-                    <svg className="mx-auto h-10 w-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    <svg
+                      className="mx-auto h-10 w-10 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
                     </svg>
                     <h3 className="mt-2 text-sm font-medium text-gray-900">No invoices</h3>
-                    <p className="mt-1 text-xs sm:text-sm text-gray-500">Create the first invoice for a client.</p>
+                    <p className="mt-1 text-xs sm:text-sm text-gray-500">
+                      Create the first invoice for a client.
+                    </p>
                   </div>
                 ) : (
                   invoices.map((invoice) => (
@@ -585,15 +653,18 @@ export default function DashboardPage() {
                             Due date: {new Date(invoice.dueDate).toLocaleDateString('en-US')}
                           </p>
                           <p className="text-xs text-gray-500">
-                            Status: <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                              invoice.status === 'sent' 
-                                ? 'bg-blue-100 text-blue-800' 
-                                : invoice.status === 'paid' 
-                                ? 'bg-green-100 text-green-800' 
-                                : invoice.status === 'generated'
-                                ? 'bg-orange-100 text-orange-800'
-                                : 'bg-yellow-100 text-yellow-800'
-                            }`}>
+                            Status:{' '}
+                            <span
+                              className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                invoice.status === 'sent'
+                                  ? 'bg-blue-100 text-blue-800'
+                                  : invoice.status === 'paid'
+                                    ? 'bg-green-100 text-green-800'
+                                    : invoice.status === 'generated'
+                                      ? 'bg-orange-100 text-orange-800'
+                                      : 'bg-yellow-100 text-yellow-800'
+                              }`}
+                            >
                               {invoice.status || 'draft'}
                             </span>
                           </p>
@@ -604,23 +675,48 @@ export default function DashboardPage() {
                           )}
                         </div>
                         <div className="flex space-x-2">
-                          <button 
+                          <button
                             onClick={() => handleInvoicePreview(invoice)}
                             className="inline-flex items-center px-2 sm:px-3 py-2 border border-gray-300 text-xs sm:text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
                           >
-                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            <svg
+                              className="w-4 h-4 mr-1"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                              />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                              />
                             </svg>
                             <span className="hidden sm:inline">Preview</span>
                             <span className="sm:hidden">👁</span>
                           </button>
-                          <button 
+                          <button
                             onClick={() => handleDownloadPDF(invoice)}
                             className="inline-flex items-center px-2 sm:px-3 py-2 border border-gray-300 text-xs sm:text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
                           >
-                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            <svg
+                              className="w-4 h-4 mr-1"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                              />
                             </svg>
                             <span className="hidden sm:inline">PDF</span>
                             <span className="sm:hidden">📄</span>
@@ -645,10 +741,15 @@ export default function DashboardPage() {
               onClick={() => setShowInvoiceEditModal(false)}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
-            
+
             <div className="mb-6">
               <h3 className="text-xl font-semibold mb-2">Edit Invoice Items</h3>
               <p className="text-gray-600 text-sm">Customize items before creating invoice</p>
@@ -661,8 +762,18 @@ export default function DashboardPage() {
                   onClick={handleAddInvoiceItem}
                   className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  <svg
+                    className="w-4 h-4 mr-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                    />
                   </svg>
                   Add Item
                 </button>
@@ -677,12 +788,22 @@ export default function DashboardPage() {
                         onClick={() => handleRemoveInvoiceItem(index)}
                         className="text-red-500 hover:text-red-700"
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                          />
                         </svg>
                       </button>
                     </div>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
@@ -694,32 +815,50 @@ export default function DashboardPage() {
                           placeholder="Service/Product Name"
                         />
                       </div>
-                      
+
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Quantity
+                        </label>
                         <input
                           type="number"
                           min="1"
                           value={item.quantity}
-                          onChange={(e) => handleUpdateInvoiceItem(index, 'quantity', parseInt(e.target.value) || 1)}
+                          onChange={(e) =>
+                            handleUpdateInvoiceItem(
+                              index,
+                              'quantity',
+                              parseInt(e.target.value) || 1,
+                            )
+                          }
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
-                      
+
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Unit Price (zł)</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Unit Price (zł)
+                        </label>
                         <input
                           type="number"
                           step="0.01"
                           min="0"
                           value={item.unitPrice}
-                          onChange={(e) => handleUpdateInvoiceItem(index, 'unitPrice', parseFloat(e.target.value) || 0)}
+                          onChange={(e) =>
+                            handleUpdateInvoiceItem(
+                              index,
+                              'unitPrice',
+                              parseFloat(e.target.value) || 0,
+                            )
+                          }
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
-                      
+
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Value (zł)</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Value (zł)
+                        </label>
                         <input
                           type="number"
                           step="0.01"
@@ -729,13 +868,17 @@ export default function DashboardPage() {
                         />
                       </div>
                     </div>
-                    
+
                     <div className="mt-3">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Description
+                      </label>
                       <input
                         type="text"
                         value={item.description}
-                        onChange={(e) => handleUpdateInvoiceItem(index, 'description', e.target.value)}
+                        onChange={(e) =>
+                          handleUpdateInvoiceItem(index, 'description', e.target.value)
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="Item description (optional)"
                       />
@@ -752,19 +895,30 @@ export default function DashboardPage() {
                     <div className="flex justify-between py-1">
                       <span className="text-gray-600">Net Value:</span>
                       <span className="font-semibold">
-                        {editingInvoiceItems.reduce((sum, item) => sum + (item.total || 0), 0).toFixed(2)} zł
+                        {editingInvoiceItems
+                          .reduce((sum, item) => sum + (item.total || 0), 0)
+                          .toFixed(2)}{' '}
+                        zł
                       </span>
                     </div>
                     <div className="flex justify-between py-1">
                       <span className="text-gray-600">VAT (23%):</span>
                       <span className="font-semibold">
-                        {(editingInvoiceItems.reduce((sum, item) => sum + (item.total || 0), 0) * 0.23).toFixed(2)} zł
+                        {(
+                          editingInvoiceItems.reduce((sum, item) => sum + (item.total || 0), 0) *
+                          0.23
+                        ).toFixed(2)}{' '}
+                        zł
                       </span>
                     </div>
                     <div className="flex justify-between py-2 border-t border-gray-200 font-semibold text-lg">
                       <span>Total:</span>
                       <span>
-                        {(editingInvoiceItems.reduce((sum, item) => sum + (item.total || 0), 0) * 1.23).toFixed(2)} zł
+                        {(
+                          editingInvoiceItems.reduce((sum, item) => sum + (item.total || 0), 0) *
+                          1.23
+                        ).toFixed(2)}{' '}
+                        zł
                       </span>
                     </div>
                   </div>
@@ -800,7 +954,12 @@ export default function DashboardPage() {
               onClick={() => setShowEditModal(false)}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
             <h3 className="text-lg font-semibold mb-4">Edit Client</h3>
@@ -846,12 +1005,18 @@ export default function DashboardPage() {
                 {changeLogs.map((log) => (
                   <div key={log.id} className="py-2 text-sm">
                     <div className="flex justify-between items-center">
-                      <span className="font-medium text-gray-700">{log.user?.username || 'User'}</span>
-                      <span className="text-xs text-gray-400">{new Date(log.changedAt).toLocaleString('en-US')}</span>
+                      <span className="font-medium text-gray-700">
+                        {log.user?.username || 'User'}
+                      </span>
+                      <span className="text-xs text-gray-400">
+                        {new Date(log.changedAt).toLocaleString('en-US')}
+                      </span>
                     </div>
                     <div className="mt-1">
-                      <span className="text-gray-500">{log.field}</span>: 
-                      <span className="line-through text-red-500 mx-1">{JSON.stringify(log.before)}</span>
+                      <span className="text-gray-500">{log.field}</span>:
+                      <span className="line-through text-red-500 mx-1">
+                        {JSON.stringify(log.before)}
+                      </span>
                       <span className="text-green-600 mx-1">{JSON.stringify(log.after)}</span>
                     </div>
                   </div>
@@ -871,12 +1036,19 @@ export default function DashboardPage() {
               onClick={() => setShowInvoiceModal(false)}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
-            
+
             <div className="mb-6">
-              <h3 className="text-xl font-semibold mb-2">Invoice {selectedInvoice.invoiceNumber}</h3>
+              <h3 className="text-xl font-semibold mb-2">
+                Invoice {selectedInvoice.invoiceNumber}
+              </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div>
                   <h4 className="font-semibold text-gray-700 mb-2">Seller Information</h4>
@@ -898,24 +1070,30 @@ export default function DashboardPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                 <div>
                   <span className="font-semibold text-gray-700">Issue date:</span>
-                  <p className="text-gray-600">{new Date(selectedInvoice.issueDate).toLocaleDateString('en-US')}</p>
+                  <p className="text-gray-600">
+                    {new Date(selectedInvoice.issueDate).toLocaleDateString('en-US')}
+                  </p>
                 </div>
                 <div>
                   <span className="font-semibold text-gray-700">Due date:</span>
-                  <p className="text-gray-600">{new Date(selectedInvoice.dueDate).toLocaleDateString('en-US')}</p>
+                  <p className="text-gray-600">
+                    {new Date(selectedInvoice.dueDate).toLocaleDateString('en-US')}
+                  </p>
                 </div>
                 <div>
                   <span className="font-semibold text-gray-700">Status:</span>
                   <p className="text-gray-600">
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                      selectedInvoice.status === 'sent' 
-                        ? 'bg-blue-100 text-blue-800' 
-                        : selectedInvoice.status === 'paid' 
-                        ? 'bg-green-100 text-green-800' 
-                        : selectedInvoice.status === 'generated'
-                        ? 'bg-orange-100 text-orange-800'
-                        : 'bg-yellow-100 text-yellow-800'
-                    }`}>
+                    <span
+                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                        selectedInvoice.status === 'sent'
+                          ? 'bg-blue-100 text-blue-800'
+                          : selectedInvoice.status === 'paid'
+                            ? 'bg-green-100 text-green-800'
+                            : selectedInvoice.status === 'generated'
+                              ? 'bg-orange-100 text-orange-800'
+                              : 'bg-yellow-100 text-yellow-800'
+                      }`}
+                    >
                       {selectedInvoice.status || 'draft'}
                     </span>
                   </p>
@@ -931,8 +1109,12 @@ export default function DashboardPage() {
                     <thead className="bg-gray-50">
                       <tr>
                         <th className="px-4 py-2 text-left font-semibold text-gray-700">Name</th>
-                        <th className="px-4 py-2 text-right font-semibold text-gray-700">Quantity</th>
-                        <th className="px-4 py-2 text-right font-semibold text-gray-700">Unit Price</th>
+                        <th className="px-4 py-2 text-right font-semibold text-gray-700">
+                          Quantity
+                        </th>
+                        <th className="px-4 py-2 text-right font-semibold text-gray-700">
+                          Unit Price
+                        </th>
                         <th className="px-4 py-2 text-right font-semibold text-gray-700">Value</th>
                       </tr>
                     </thead>
@@ -941,8 +1123,12 @@ export default function DashboardPage() {
                         <tr key={index} className="border-t border-gray-200">
                           <td className="px-4 py-2 text-gray-700">{item.name}</td>
                           <td className="px-4 py-2 text-right text-gray-600">{item.quantity}</td>
-                          <td className="px-4 py-2 text-right text-gray-600">{item.unitPrice?.toFixed(2)} zł</td>
-                          <td className="px-4 py-2 text-right text-gray-600">{item.total?.toFixed(2)} zł</td>
+                          <td className="px-4 py-2 text-right text-gray-600">
+                            {item.unitPrice?.toFixed(2)} zł
+                          </td>
+                          <td className="px-4 py-2 text-right text-gray-600">
+                            {item.total?.toFixed(2)} zł
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -957,11 +1143,15 @@ export default function DashboardPage() {
                   <div className="w-64 text-sm">
                     <div className="flex justify-between py-1">
                       <span className="text-gray-600">Net value:</span>
-                      <span className="font-semibold">{selectedInvoice.data.subtotal?.toFixed(2)} zł</span>
+                      <span className="font-semibold">
+                        {selectedInvoice.data.subtotal?.toFixed(2)} zł
+                      </span>
                     </div>
                     <div className="flex justify-between py-1">
                       <span className="text-gray-600">VAT ({selectedInvoice.data.vatRate}%):</span>
-                      <span className="font-semibold">{selectedInvoice.data.vatAmount?.toFixed(2)} zł</span>
+                      <span className="font-semibold">
+                        {selectedInvoice.data.vatAmount?.toFixed(2)} zł
+                      </span>
                     </div>
                     <div className="flex justify-between py-2 border-t border-gray-200 font-semibold text-lg">
                       <span>Total:</span>
@@ -975,10 +1165,19 @@ export default function DashboardPage() {
             <div className="mb-6">
               <h4 className="font-semibold text-gray-700 mb-2">Payment Information</h4>
               <div className="bg-gray-50 p-4 rounded-lg text-sm">
-                <p className="text-gray-600"><span className="font-semibold">Bank:</span> Example Bank S.A.</p>
-                <p className="text-gray-600"><span className="font-semibold">Account number:</span> 12 1234 5678 9012 3456 7890 1234</p>
-                <p className="text-gray-600"><span className="font-semibold">SWIFT:</span> EXAPLXX</p>
-                <p className="text-gray-600"><span className="font-semibold">IBAN:</span> PL12 1234 5678 9012 3456 7890 1234</p>
+                <p className="text-gray-600">
+                  <span className="font-semibold">Bank:</span> Example Bank S.A.
+                </p>
+                <p className="text-gray-600">
+                  <span className="font-semibold">Account number:</span> 12 1234 5678 9012 3456 7890
+                  1234
+                </p>
+                <p className="text-gray-600">
+                  <span className="font-semibold">SWIFT:</span> EXAPLXX
+                </p>
+                <p className="text-gray-600">
+                  <span className="font-semibold">IBAN:</span> PL12 1234 5678 9012 3456 7890 1234
+                </p>
               </div>
             </div>
 
@@ -1001,4 +1200,4 @@ export default function DashboardPage() {
       )}
     </div>
   );
-} 
+}
