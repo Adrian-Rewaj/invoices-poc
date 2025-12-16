@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getUserFromRequest } from '@/lib/auth';
 import { withSecurityHeaders, handleOptions } from '../../../lib/cors';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../auth/[...nextauth]/route';
 
 export async function OPTIONS(request: NextRequest) {
   return handleOptions(request);
@@ -16,25 +17,16 @@ export async function GET() {
   } catch (error) {
     console.error('Error fetching clients:', error);
     return withSecurityHeaders(
-      NextResponse.json(
-        { error: 'Internal server error' },
-        { status: 500 }
-      )
+      NextResponse.json({ error: 'Internal server error' }, { status: 500 }),
     );
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    // Sprawdź autoryzację
-    const user = await getUserFromRequest(request);
-    if (!user) {
-      return withSecurityHeaders(
-        NextResponse.json(
-          { error: 'Unauthorized' },
-          { status: 401 }
-        )
-      );
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return withSecurityHeaders(NextResponse.json({ error: 'Unauthorized' }, { status: 401 }));
     }
 
     const body = await request.json();
@@ -46,10 +38,7 @@ export async function POST(request: NextRequest) {
 
     if (!name || !email || !nip) {
       return withSecurityHeaders(
-        NextResponse.json(
-          { error: 'Name, email and NIP are required' },
-          { status: 400 }
-        )
+        NextResponse.json({ error: 'Name, email and NIP are required' }, { status: 400 }),
       );
     }
 
@@ -65,10 +54,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error creating client:', error);
     return withSecurityHeaders(
-      NextResponse.json(
-        { error: 'Internal server error' },
-        { status: 500 }
-      )
+      NextResponse.json({ error: 'Internal server error' }, { status: 500 }),
     );
   }
-} 
+}

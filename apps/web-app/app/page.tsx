@@ -2,18 +2,19 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
 export default function HomePage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
+    if (status === 'authenticated') {
       router.push('/dashboard');
     } else {
       router.push('/login');
     }
-  }, [router]);
+  }, [status, router]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
@@ -23,4 +24,4 @@ export default function HomePage() {
       </div>
     </div>
   );
-} 
+}

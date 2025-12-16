@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { publishEvent } from '../../../lib/rabbitmq';
-import { getUserFromRequest } from '@/lib/auth';
 import { withSecurityHeaders, handleOptions } from '../../../lib/cors';
 import {
   generateInvoiceNumber,
@@ -10,6 +9,8 @@ import {
   type InvoiceItem,
 } from '../../../lib/invoice';
 import { v4 as uuidv4 } from 'uuid';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../auth/[...nextauth]/route';
 
 const RABBITMQ_QUEUE_NAME = process.env.RABBITMQ_QUEUE_NAME || 'invoice.created';
 
@@ -43,11 +44,11 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    // Sprawdź autoryzację
-    const user = await getUserFromRequest(request);
-    if (!user) {
+    const session = await getServerSession(authOptions);
+    if (!session) {
       return withSecurityHeaders(NextResponse.json({ error: 'Unauthorized' }, { status: 401 }));
     }
+    const user = session.user;
 
     const body = await request.json();
     const { clientId, items = [] } = body as {
