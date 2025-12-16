@@ -75,7 +75,7 @@ async function bootstrap() {
 
   console.log(' [*] Exchange, queues and bindings asserted');
   console.log(
-    ' [*] Waiting for messages in invoice.created. To exit press CTRL+C',
+    ` [*] Waiting for messages in ${RABBITMQ_INVOICE_CREATED_QUEUE_NAME}. To exit press CTRL+C`,
   );
 
   let activeWorkers = 0;
@@ -91,7 +91,10 @@ async function bootstrap() {
 
     activeWorkers++;
     const invoiceData = JSON.parse(msg.content.toString());
-    console.log(' [x] Received invoice.created:', invoiceData);
+    console.log(
+      ` [x] Received ${RABBITMQ_INVOICE_CREATED_QUEUE_NAME}:`,
+      invoiceData,
+    );
 
     const worker = new Worker(path.resolve(__dirname, 'pdf.worker.js'), {
       workerData: { invoice: invoiceData, pdfPath: PDF_STORAGE_PATH },
@@ -111,7 +114,7 @@ async function bootstrap() {
           Buffer.from(JSON.stringify(sendData)),
           { persistent: true },
         );
-        console.log(' [>] Sent invoice.send:', sendData);
+        console.log(` [>] Sent ${RABBITMQ_INVOICE_SEND_QUEUE_NAME}:`, sendData);
 
         channel.ack(msg); // ✅ ACK only on success
       } catch (err) {

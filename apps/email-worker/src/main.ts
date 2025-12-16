@@ -67,7 +67,7 @@ async function main() {
     if (!msg) return;
 
     const data = JSON.parse(msg.content.toString());
-    console.log(' [x] Received invoice.send:', data);
+    console.log(` [x] Received ${RABBITMQ_INVOICE_SEND_QUEUE_NAME}:`, data);
 
     try {
       // Pobierz PDF
