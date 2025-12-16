@@ -12,8 +12,12 @@ const RABBITMQ_INVOICE_CREATED_QUEUE_NAME =
 const RABBITMQ_INVOICE_SEND_QUEUE_NAME =
   process.env.RABBITMQ_INVOICE_SEND_QUEUE_NAME || 'invoice.send';
 const RABBITMQ_EXCHANGE_NAME = process.env.RABBITMQ_EXCHANGE_NAME || 'invoices';
+const RABBITMQ_INVOICE_CREATED_DLQ_NAME =
+  process.env.RABBITMQ_INVOICE_CREATED_DLQ_NAME || 'invoice.created.dlq';
+const RABBITMQ_DLX_NAME = process.env.RABBITMQ_DLX_NAME || 'invoices.dlx';
 const PDF_STORAGE_PATH =
   process.env.PDF_STORAGE_PATH || path.resolve(__dirname, '../../storage/pdfs');
+
 const prisma = new PrismaClient();
 
 const INVOICE_WORKER_RABBITMQ_CHANNEL_PREFETCH = parseInt(
@@ -36,87 +40,104 @@ async function bootstrap() {
   // Set prefetch
   channel.prefetch(INVOICE_WORKER_RABBITMQ_CHANNEL_PREFETCH);
 
-  // Exchange and binding
-  await channel.assertExchange(RABBITMQ_EXCHANGE_NAME, 'topic', {
-    durable: true,
-  });
-  const q = await channel.assertQueue(RABBITMQ_INVOICE_CREATED_QUEUE_NAME, {
+  await channel.assertExchange(RABBITMQ_DLX_NAME, 'topic', { durable: true });
+  await channel.assertQueue(RABBITMQ_INVOICE_CREATED_DLQ_NAME, {
     durable: true,
   });
   await channel.bindQueue(
-    q.queue,
+    RABBITMQ_INVOICE_CREATED_DLQ_NAME,
+    RABBITMQ_DLX_NAME,
+    RABBITMQ_INVOICE_CREATED_DLQ_NAME,
+  );
+
+  // Main Exchange
+  await channel.assertExchange(RABBITMQ_EXCHANGE_NAME, 'topic', {
+    durable: true,
+  });
+
+  // Main Queue with DLX settings
+  const mainQueue = await channel.assertQueue(
+    RABBITMQ_INVOICE_CREATED_QUEUE_NAME,
+    {
+      durable: true,
+      arguments: {
+        'x-dead-letter-exchange': RABBITMQ_DLX_NAME,
+        'x-dead-letter-routing-key': RABBITMQ_INVOICE_CREATED_DLQ_NAME,
+      },
+    },
+  );
+
+  await channel.bindQueue(
+    mainQueue.queue,
     RABBITMQ_EXCHANGE_NAME,
     RABBITMQ_INVOICE_CREATED_QUEUE_NAME,
   );
-  await channel.assertQueue(RABBITMQ_INVOICE_SEND_QUEUE_NAME, {
-    durable: true,
-  });
-  console.log(' [*] Exchange, queues and bindings asserted');
 
+  console.log(' [*] Exchange, queues and bindings asserted');
   console.log(
-    ' [*] Waiting for messages in invoice.created. To exit press CTRL+C',
+    ` [*] Waiting for messages in ${RABBITMQ_INVOICE_CREATED_QUEUE_NAME}. To exit press CTRL+C`,
   );
 
   let activeWorkers = 0;
 
-  channel.consume(q.queue, async (msg) => {
-    if (msg) {
-      if (activeWorkers >= INVOICE_WORKER_THREADS_LIMIT) {
-        // Thread limit reached, requeue message and wait
-        console.warn(' [!] Worker thread limit reached, requeueing message');
-        channel.nack(msg, false, true); // requeue
-        return;
-      }
-      activeWorkers++;
-      console.log(' [x] Received invoice.created message');
-      const invoiceData = JSON.parse(msg.content.toString());
-      console.log(' [x] Received invoice.created:', invoiceData);
+  channel.consume(mainQueue.queue, async (msg) => {
+    if (!msg) return;
 
-      // Generate PDF in worker
-      const worker = new Worker(path.resolve(__dirname, 'pdf.worker.js'), {
-        workerData: { invoice: invoiceData, pdfPath: PDF_STORAGE_PATH },
-      });
-
-      worker.on('message', async (pdfFileName) => {
-        try {
-          // Update database with PDF file name and status "generated"
-          await prisma.invoice.update({
-            where: { id: invoiceData.invoiceId || invoiceData.id },
-            data: {
-              pdfFileName,
-              status: 'generated',
-            },
-          });
-          console.log(
-            ` [✓] Invoice ${invoiceData.invoiceId || invoiceData.id} pdfFileName updated to '${pdfFileName}' and status set to 'generated'`,
-          );
-          // After PDF is generated, send to invoice.send
-          const sendData = { ...invoiceData, pdfFileName };
-          channel.sendToQueue(
-            RABBITMQ_INVOICE_SEND_QUEUE_NAME,
-            Buffer.from(JSON.stringify(sendData)),
-            { persistent: true },
-          );
-          console.log(' [>] Sent invoice.send:', sendData);
-        } catch (error) {
-          console.error('Error updating invoice with PDF filename:', error);
-        }
-      });
-
-      worker.on('error', (err) => {
-        console.error('PDF worker error:', err);
-      });
-
-      worker.on('exit', (code) => {
-        activeWorkers--;
-        if (code !== 0) {
-          console.error(`PDF worker stopped with exit code ${code}`);
-        }
-        // Optionally, you can add logic here to re-fetch the message if the worker crashed
-      });
-
-      channel.ack(msg);
+    if (activeWorkers >= INVOICE_WORKER_THREADS_LIMIT) {
+      console.warn(' [!] Worker thread limit reached, requeueing message');
+      channel.nack(msg, false, true); // requeue
+      return;
     }
+
+    activeWorkers++;
+    const invoiceData = JSON.parse(msg.content.toString());
+    console.log(
+      ` [x] Received ${RABBITMQ_INVOICE_CREATED_QUEUE_NAME}:`,
+      invoiceData,
+    );
+
+    const worker = new Worker(path.resolve(__dirname, 'pdf.worker.js'), {
+      workerData: { invoice: invoiceData, pdfPath: PDF_STORAGE_PATH },
+    });
+
+    // On success
+    worker.once('message', async (pdfFileName) => {
+      try {
+        await prisma.invoice.update({
+          where: { id: invoiceData.invoiceId || invoiceData.id },
+          data: { pdfFileName, status: 'generated' },
+        });
+
+        const sendData = { ...invoiceData, pdfFileName };
+        channel.sendToQueue(
+          RABBITMQ_INVOICE_SEND_QUEUE_NAME,
+          Buffer.from(JSON.stringify(sendData)),
+          { persistent: true },
+        );
+        console.log(` [>] Sent ${RABBITMQ_INVOICE_SEND_QUEUE_NAME}:`, sendData);
+
+        channel.ack(msg); // ✅ ACK only on success
+      } catch (err) {
+        console.error(' [!] Processing error, sending to DLQ:', err);
+        channel.nack(msg, false, false); // ❌ send to DLQ
+      } finally {
+        activeWorkers--;
+      }
+    });
+
+    // Worker error → DLQ
+    worker.once('error', (err) => {
+      console.error(' [!] PDF worker error, sending to DLQ:', err);
+      activeWorkers--;
+      channel.nack(msg, false, false);
+    });
+
+    // Worker exit
+    worker.once('exit', (code) => {
+      if (code !== 0) {
+        console.error(` [!] PDF worker exited with code ${code}`);
+      }
+    });
   });
 }
 
