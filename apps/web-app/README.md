@@ -80,7 +80,7 @@ More information: [TESTING.md](./TESTING.md)
 DATABASE_URL="postgresql://invoices_user:invoices_password@localhost:5432/invoices_db"
 
 # JWT
-JWT_SECRET="your-secret-key"
+NEXTAUTH_SECRET="your-secret-key"
 
 # RabbitMQ
 RABBITMQ_URL="amqp://invoices_user:invoices_password@localhost:5672"
