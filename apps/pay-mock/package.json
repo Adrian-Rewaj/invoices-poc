@@ -18,11 +18,9 @@
   "license": "ISC",
   "description": "Mock payment application for invoice system",
   "dependencies": {
-    "@prisma/client": "^6.11.1",
     "cors": "^2.8.5",
     "data-uri-to-buffer": "^6.0.2",
     "express": "^5.1.0",
-    "node-fetch": "^3.3.2",
-    "prisma": "^6.11.1"
+    "node-fetch": "^3.3.2"
   }
 }
