@@ -1,9 +1,9 @@
-interface Props {
+interface LoginButtonProps {
   loading: boolean;
   text: string;
 }
 
-export default function LoginButton({ loading, text }: Props) {
+export default function LoginButton({ loading, text }: LoginButtonProps) {
   return (
     <button
       type="submit"

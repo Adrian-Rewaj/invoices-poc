@@ -7,11 +7,11 @@ export async function OPTIONS(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  // Sprawdź sygnaturę
+  // check signature
   const signature = request.headers.get('x-payment-signature');
   const expected = process.env.PAYMENT_SIGNATURE;
   if (!signature || !expected || signature !== expected) {
-    // Nieprawidłowa sygnatura - kończymy bez akcji
+    // wrong signature - reject
     return withSecurityHeaders(new NextResponse(null, { status: 401 }));
   }
 
@@ -23,7 +23,9 @@ export async function POST(request: NextRequest) {
   }
 
   if (!body.invoiceId || !body.status) {
-    return withSecurityHeaders(NextResponse.json({ error: 'Missing invoiceId or status' }, { status: 400 }));
+    return withSecurityHeaders(
+      NextResponse.json({ error: 'Missing invoiceId or status' }, { status: 400 }),
+    );
   }
 
   if (body.status === 'paid') {
@@ -34,4 +36,4 @@ export async function POST(request: NextRequest) {
   }
 
   return withSecurityHeaders(NextResponse.json({ ok: true }));
-} 
+}

@@ -5,13 +5,20 @@ import { useRouter } from 'next/navigation';
 import LoginHeader from '@/components/login/LoginHeader';
 import LoginForm from '@/components/login/LoginForm';
 import LoginFooter from '@/components/login/LoginFooter';
+import { useEffect } from 'react';
 
 export default function LoginPage() {
   const { status } = useSession();
   const router = useRouter();
 
+  useEffect(() => {
+    if (status === 'authenticated') {
+      router.push('/dashboard');
+    }
+  }, [status, router]);
+
   if (status === 'authenticated') {
-    router.push('/dashboard');
+    // Optional: render nothing while redirecting
     return null;
   }
 

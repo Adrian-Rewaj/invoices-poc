@@ -27,7 +27,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
       );
     }
 
-    // Pobierz fakturę z bazą danych
+    // get invoice details from db
     const invoice = await prisma.invoice.findUnique({
       where: { id: invoiceId },
       include: {
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
       );
     }
 
-    // Sprawdź czy plik PDF istnieje
+    // check if pdf exists
     if (!invoice.pdfFileName) {
       return withSecurityHeaders(
         NextResponse.json({ error: 'PDF file not available yet' }, { status: 404 }),
