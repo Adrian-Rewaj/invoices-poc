@@ -7,7 +7,7 @@ export async function OPTIONS(request: NextRequest) {
 }
 
 // GET /api/clients/[id]/history - historia zmian klienta
-export async function GET(req: NextRequest, context: { params: { id: string } }) {
+export async function GET(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   const params = await context.params;
   const id = Number(params.id);
   if (isNaN(id)) {

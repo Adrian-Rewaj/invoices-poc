@@ -1,8 +1,9 @@
-import NextAuth from 'next-auth';
+import NextAuth, { AuthOptions, Session, User } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { authenticateUser } from '../../../../lib/auth';
+import { JWT } from 'next-auth/jwt';
 
-export const authOptions = {
+export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -17,7 +18,7 @@ export const authOptions = {
         if (!user) return null;
 
         // Return user object
-        return { id: user.id, name: user.username };
+        return { id: String(user.id), name: user.username };
       },
     }),
   ],
@@ -25,17 +26,21 @@ export const authOptions = {
     strategy: 'jwt',
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user }: { token: JWT; user: User }) {
       if (user) {
         token.id = user.id;
-        token.username = user.username;
+        token.name = user.name;
       }
       return token;
     },
-    async session({ session, token }) {
-      session.user.id = token.id;
-      session.user.name = token.username;
-      return session;
+    async session({ session, token }: { session: Session; token: JWT }) {
+      return {
+        ...session,
+        user: {
+          id: token.id as string,
+          name: token.name as string,
+        },
+      };
     },
   },
   pages: {

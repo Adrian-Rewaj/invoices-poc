@@ -10,7 +10,7 @@ export async function OPTIONS(request: NextRequest) {
   return handleOptions(request);
 }
 
-export async function GET(request: NextRequest, context: { params: { id: string } }) {
+export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   const params = await context.params;
 
   try {

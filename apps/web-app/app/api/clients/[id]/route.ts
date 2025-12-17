@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '../../auth/[...nextauth]/route';
 
 // GET /api/clients/[id] - pobierz dane klienta
-export async function GET(req: NextRequest, context: { params: { id: string } }) {
+export async function GET(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   const params = await context.params;
   const id = Number(params.id);
   if (isNaN(id)) {
@@ -18,7 +18,7 @@ export async function GET(req: NextRequest, context: { params: { id: string } })
 }
 
 // PATCH /api/clients/[id] - edytuj klienta i loguj zmiany
-export async function PATCH(req: NextRequest, context: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   const params = await context.params;
   const id = Number(params.id);
   if (isNaN(id)) {
@@ -76,7 +76,7 @@ export async function PATCH(req: NextRequest, context: { params: { id: string } 
 }
 
 // GET /api/clients/[id]/history - historia zmian klienta
-export async function GET_HISTORY(req: NextRequest, context: { params: { id: string } }) {
+export async function GET_HISTORY(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   const params = await context.params;
   const id = Number(params.id);
   if (isNaN(id)) {

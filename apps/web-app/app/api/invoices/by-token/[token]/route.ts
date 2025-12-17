@@ -6,7 +6,7 @@ export async function OPTIONS(request: NextRequest) {
   return handleOptions(request);
 }
 
-export async function GET(req: NextRequest, context: { params: { token: string } }) {
+export async function GET(req: NextRequest, context: { params: Promise<{ token: string }> }) {
   const params = await context.params;
   try {
     const invoice = await prisma.invoice.findUnique({
