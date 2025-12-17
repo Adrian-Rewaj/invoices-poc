@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '../../auth/[...nextauth]/route';
 
 // GET /api/clients/[id] - pobierz dane klienta
-export async function GET(req: NextRequest, context: { params: { id: string } }) {
+export async function GET(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   const params = await context.params;
   const id = Number(params.id);
   if (isNaN(id)) {
@@ -17,8 +17,8 @@ export async function GET(req: NextRequest, context: { params: { id: string } })
   return NextResponse.json(client);
 }
 
-// PATCH /api/clients/[id] - edytuj klienta i loguj zmiany
-export async function PATCH(req: NextRequest, context: { params: { id: string } }) {
+// PATCH /api/clients/[id] - edit client and log changes
+export async function PATCH(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   const params = await context.params;
   const id = Number(params.id);
   if (isNaN(id)) {
@@ -60,12 +60,12 @@ export async function PATCH(req: NextRequest, context: { params: { id: string } 
     return NextResponse.json({ error: 'No changes' }, { status: 400 });
   }
   const updated = await prisma.client.update({ where: { id }, data: updates });
-  // Zapisz logi zmian
+  // save change logs
   for (const log of logs) {
     await prisma.clientChangeLog.create({
       data: {
         clientId: id,
-        userId: log.userId,
+        userId: parseInt(log.userId),
         field: log.field,
         before: log.before,
         after: log.after,
@@ -73,19 +73,4 @@ export async function PATCH(req: NextRequest, context: { params: { id: string } 
     });
   }
   return NextResponse.json(updated);
-}
-
-// GET /api/clients/[id]/history - historia zmian klienta
-export async function GET_HISTORY(req: NextRequest, context: { params: { id: string } }) {
-  const params = await context.params;
-  const id = Number(params.id);
-  if (isNaN(id)) {
-    return NextResponse.json({ error: 'Invalid client id' }, { status: 400 });
-  }
-  const logs = await prisma.clientChangeLog.findMany({
-    where: { clientId: id },
-    orderBy: { changedAt: 'desc' },
-    include: { user: { select: { username: true } } },
-  });
-  return NextResponse.json(logs);
 }

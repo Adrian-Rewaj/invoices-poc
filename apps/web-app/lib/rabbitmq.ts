@@ -3,7 +3,7 @@ import amqp from 'amqplib';
 const RABBITMQ_URL = process.env.RABBITMQ_URL || 'amqp://localhost:5672';
 const RABBITMQ_EXCHANGE_NAME = process.env.RABBITMQ_EXCHANGE_NAME || 'invoices';
 
-let connection: amqp.Connection | null = null;
+let connection: amqp.ChannelModel | null = null;
 let channel: amqp.Channel | null = null;
 
 export async function getRabbitMQConnection() {

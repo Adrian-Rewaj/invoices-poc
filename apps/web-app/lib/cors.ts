@@ -21,9 +21,6 @@ export function withSecurityHeaders(response: NextResponse) {
 
 // preflight OPTIONS
 export function handleOptions(req: NextRequest) {
-  if (req.method === 'OPTIONS') {
-    const res = new NextResponse(null, { status: 204 });
-    return withSecurityHeaders(res);
-  }
-  return null;
+  const res = new NextResponse(null, { status: 204 });
+  return withSecurityHeaders(res);
 }

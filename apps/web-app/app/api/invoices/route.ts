@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Sprawdź czy klient istnieje
+    // check if client exists
     const client = await prisma.client.findUnique({
       where: { id: clientId },
     });
@@ -71,17 +71,17 @@ export async function POST(request: NextRequest) {
       return withSecurityHeaders(NextResponse.json({ error: 'Client not found' }, { status: 404 }));
     }
 
-    // Generuj numer faktury
+    // generate invoice number
     const invoiceNumber = await generateInvoiceNumber();
 
-    // Ustaw datę płatności (30 dni od dziś)
+    // set payment day after 30 days from today
     const dueDate = new Date();
     dueDate.setDate(dueDate.getDate() + 30);
 
-    // Oblicz kwoty
+    // calculate totals
     const { subtotal, vatAmount, total } = calculateInvoiceTotals(items);
 
-    // Przygotuj dane faktury
+    // prepare invoice data
     const invoiceData: InvoiceData = {
       items,
       subtotal,
@@ -93,13 +93,13 @@ export async function POST(request: NextRequest) {
       notes: 'Dziękujemy za zaufanie',
     };
 
-    // Generuj unikalny token do płatności
+    // generate pay token
     const payToken = uuidv4();
 
     const invoice = await prisma.invoice.create({
       data: {
         clientId,
-        userId: user.id,
+        userId: parseInt(user.id),
         invoiceNumber,
         dueDate,
         data: invoiceData as any,
