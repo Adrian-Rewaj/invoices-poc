@@ -71,6 +71,9 @@ async function main() {
 
     try {
       // Pobierz PDF
+      if (!data.pdfFileName) {
+        throw new Error('Missing pdfFileName in invoice.send message');
+      }
       const pdfPath = path.join(PDF_STORAGE_PATH, data.pdfFileName);
       const pdfBuffer = fs.readFileSync(pdfPath);
 
