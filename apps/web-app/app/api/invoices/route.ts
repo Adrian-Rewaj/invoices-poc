@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
       total,
       currency: 'PLN',
       paymentTerms: '30 dni',
-      notes: 'Dziękujemy za zaufanie',
+      notes: 'Thank you for your trust',
     };
 
     // generate pay token
