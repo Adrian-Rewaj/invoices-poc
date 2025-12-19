@@ -9,8 +9,7 @@ import {
   type InvoiceItem,
 } from '../../../lib/invoice';
 import { v4 as uuidv4 } from 'uuid';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '../auth/[...nextauth]/route';
+import { getSession } from '../../../lib/auth';
 
 const RABBITMQ_QUEUE_NAME = process.env.RABBITMQ_QUEUE_NAME || 'invoice.created';
 
@@ -19,6 +18,11 @@ export async function OPTIONS(request: NextRequest) {
 }
 
 export async function GET() {
+  const session = await getSession();
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const invoices = await prisma.invoice.findMany({
       include: {
@@ -43,11 +47,12 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const session = await getSession();
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return withSecurityHeaders(NextResponse.json({ error: 'Unauthorized' }, { status: 401 }));
-    }
     const user = session.user;
 
     const body = await request.json();

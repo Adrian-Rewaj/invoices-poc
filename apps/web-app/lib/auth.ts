@@ -1,5 +1,8 @@
 import bcrypt from 'bcryptjs';
 import { prisma } from './prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../app/api/auth/[...nextauth]/route';
+import { NextResponse } from 'next/server';
 
 export interface JWTPayload {
   userId: number;
@@ -25,4 +28,14 @@ export async function authenticateUser(username: string, password: string) {
   }
 
   return user;
+}
+
+export async function getSession() {
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    return null;
+  }
+
+  return session;
 }
