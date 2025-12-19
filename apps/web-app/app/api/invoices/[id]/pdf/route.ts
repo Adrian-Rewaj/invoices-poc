@@ -3,23 +3,21 @@ import { prisma } from '@/lib/prisma';
 import { withSecurityHeaders, handleOptions } from '../../../../../lib/cors';
 import { promises as fs } from 'fs';
 import path from 'path';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '../../../auth/[...nextauth]/route';
+import { getSession } from '../../../../../lib/auth';
 
 export async function OPTIONS(request: NextRequest) {
   return handleOptions(request);
 }
 
 export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const session = await getSession();
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const params = await context.params;
 
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return withSecurityHeaders(NextResponse.json({ error: 'Unauthorized' }, { status: 401 }));
-    }
-    const user = session.user;
-
     const invoiceId = Number(params.id);
     if (isNaN(invoiceId)) {
       return withSecurityHeaders(

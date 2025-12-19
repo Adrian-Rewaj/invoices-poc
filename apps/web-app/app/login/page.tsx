@@ -1,25 +1,15 @@
-'use client';
-
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import LoginHeader from '@/components/login/LoginHeader';
 import LoginForm from '@/components/login/LoginForm';
 import LoginFooter from '@/components/login/LoginFooter';
-import { useEffect } from 'react';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../api/auth/[...nextauth]/route';
+import { redirect } from 'next/navigation';
 
-export default function LoginPage() {
-  const { status } = useSession();
-  const router = useRouter();
+export default async function LoginPage() {
+  const session = await getServerSession(authOptions);
 
-  useEffect(() => {
-    if (status === 'authenticated') {
-      router.push('/dashboard');
-    }
-  }, [status, router]);
-
-  if (status === 'authenticated') {
-    // Optional: render nothing while redirecting
-    return null;
+  if (session) {
+    redirect('/dashboard');
   }
 
   return (

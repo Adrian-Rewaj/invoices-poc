@@ -34,8 +34,8 @@ npm install
 npm run docker:up
 
 # DB migrations and create default user
-npm run db:generate
 npm run db:migrate
+npm run db:generate
 npm run db:seed
 
 # Start all applications

@@ -1,12 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '../../../../../lib/prisma';
 import { withSecurityHeaders, handleOptions } from '../../../../../lib/cors';
+import { getSession } from '../../../../../lib/auth';
 
 export async function OPTIONS(request: NextRequest) {
   return handleOptions(request);
 }
 
 export async function GET(req: NextRequest, context: { params: Promise<{ token: string }> }) {
+  const session = await getSession();
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const params = await context.params;
   try {
     const invoice = await prisma.invoice.findUnique({
