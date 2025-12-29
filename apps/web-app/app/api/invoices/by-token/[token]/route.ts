@@ -9,7 +9,11 @@ export async function OPTIONS(request: NextRequest) {
 
 export async function GET(req: NextRequest, context: { params: Promise<{ token: string }> }) {
   const session = await getSession();
-  if (!session) {
+
+  const signature = req.headers.get('x-payment-signature');
+  const expected = process.env.PAYMENT_SIGNATURE;
+
+  if (!session && (!signature || !expected || signature !== expected)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
