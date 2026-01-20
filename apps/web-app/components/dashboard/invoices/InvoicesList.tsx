@@ -1,4 +1,4 @@
-import { Invoice } from '../../types/invoice';
+import { Invoice } from '../../../types/invoice';
 
 interface InvociesListProps {
   invoices: Invoice[];
@@ -6,7 +6,11 @@ interface InvociesListProps {
   onDownloadPDF: (invoice: Invoice) => void;
 }
 
-export function InvoicesList({ invoices, onInvoicePreview, onDownloadPDF }: InvociesListProps) {
+export default function InvoicesList({
+  invoices,
+  onInvoicePreview,
+  onDownloadPDF,
+}: InvociesListProps) {
   return (
     <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
       <div className="px-4 sm:px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-green-50 to-emerald-50">

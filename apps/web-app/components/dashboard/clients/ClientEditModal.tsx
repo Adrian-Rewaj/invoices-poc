@@ -1,4 +1,4 @@
-import { ClientChangeLog, NewClient } from '../../types/client';
+import { ClientChangeLog, NewClient } from '../../../types/client';
 
 interface ClientEditModalProps {
   setShowEditClientModal: (show: boolean) => void;
@@ -70,7 +70,6 @@ export function ClientEditModal({
         >
           {editLoading ? 'Saving...' : 'Save Changes'}
         </button>
-        {/* Historia zmian */}
         <div className="mt-8">
           <h4 className="text-md font-semibold mb-2">Change History ({changeLogs.length})</h4>
           <div className="max-h-48 overflow-y-auto divide-y divide-gray-100">

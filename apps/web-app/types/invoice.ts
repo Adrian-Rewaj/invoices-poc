@@ -1,4 +1,13 @@
 import { Client } from './client';
+import { InvoiceItem } from './invoice-item';
+
+export interface InvoiceData {
+  items: InvoiceItem[];
+  subtotal: number;
+  vatRate: number;
+  vatAmount: number;
+  total: number;
+}
 
 export interface Invoice {
   id: number;
@@ -7,7 +16,7 @@ export interface Invoice {
   issueDate: string;
   dueDate: string;
   invoiceNumber: string;
-  data: any;
+  data: InvoiceData;
   pdfFileName?: string;
   status: string;
   client: Client;

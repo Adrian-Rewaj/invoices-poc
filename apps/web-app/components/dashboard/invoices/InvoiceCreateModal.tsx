@@ -1,22 +1,34 @@
-import { InvoiceItem } from '../../types/invoice-item';
+import { useMemo } from 'react';
+import { InvoiceItem } from '../../../types/invoice-item';
 
 interface InvoiceCreateModalProps {
   setShowInvoiceEditModal: (show: boolean) => void;
   onAddInvoiceItem: () => void;
   invoiceItems: InvoiceItem[];
-  onRemoveInvoiceItem: (index: number) => void;
-  onUpdateInvoiceItem: (index: number, field: string, value: string | number) => void;
+  onRemoveInvoiceItem: (id: string) => void;
+  onUpdateInvoiceItem: (id: string, field: string, value: string | number) => void;
   onSaveInvoice: () => void;
+  isSaving: boolean;
+  error: string;
 }
 
-export function InvoiceCreateModal({
+export default function InvoiceCreateModal({
   setShowInvoiceEditModal,
   onAddInvoiceItem,
   invoiceItems,
   onRemoveInvoiceItem,
   onUpdateInvoiceItem,
   onSaveInvoice,
+  isSaving,
+  error,
 }: InvoiceCreateModalProps) {
+  const { subtotal, vatAmount, total } = useMemo(() => {
+    const sub = invoiceItems.reduce((sum, item) => sum + (item.total || 0), 0);
+    const vat = sub * 0.23;
+    const tot = sub * 1.23;
+    return { subtotal: sub, vatAmount: vat, total: tot };
+  }, [invoiceItems]);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
       <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto relative animate-fade-in">
@@ -60,11 +72,11 @@ export function InvoiceCreateModal({
 
           <div className="space-y-4">
             {invoiceItems.map((item, index) => (
-              <div key={index} className="border border-gray-200 rounded-lg p-4">
+              <div key={item.id} className="border border-gray-200 rounded-lg p-4">
                 <div className="flex justify-between items-start mb-3">
                   <h5 className="font-medium text-gray-700">Item {index + 1}</h5>
                   <button
-                    onClick={() => onRemoveInvoiceItem(index)}
+                    onClick={() => item.id && onRemoveInvoiceItem(item.id)}
                     className="text-red-500 hover:text-red-700"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -84,7 +96,9 @@ export function InvoiceCreateModal({
                     <input
                       type="text"
                       value={item.name}
-                      onChange={(e) => onUpdateInvoiceItem(index, 'name', e.target.value)}
+                      onChange={(e) =>
+                        item.id && onUpdateInvoiceItem(item.id, 'name', e.target.value)
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="Service/Product Name"
                     />
@@ -97,7 +111,8 @@ export function InvoiceCreateModal({
                       min="1"
                       value={item.quantity}
                       onChange={(e) =>
-                        onUpdateInvoiceItem(index, 'quantity', parseInt(e.target.value) || 1)
+                        item.id &&
+                        onUpdateInvoiceItem(item.id, 'quantity', parseInt(e.target.value) || 1)
                       }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
@@ -113,7 +128,8 @@ export function InvoiceCreateModal({
                       min="0"
                       value={item.unitPrice}
                       onChange={(e) =>
-                        onUpdateInvoiceItem(index, 'unitPrice', parseFloat(e.target.value) || 0)
+                        item.id &&
+                        onUpdateInvoiceItem(item.id, 'unitPrice', parseFloat(e.target.value) || 0)
                       }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
@@ -140,7 +156,9 @@ export function InvoiceCreateModal({
                   <input
                     type="text"
                     value={item.description}
-                    onChange={(e) => onUpdateInvoiceItem(index, 'description', e.target.value)}
+                    onChange={(e) =>
+                      item.id && onUpdateInvoiceItem(item.id, 'description', e.target.value)
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Item description (optional)"
                   />
@@ -156,32 +174,22 @@ export function InvoiceCreateModal({
               <div className="w-64 text-sm">
                 <div className="flex justify-between py-1">
                   <span className="text-gray-600">Net Value:</span>
-                  <span className="font-semibold">
-                    {invoiceItems.reduce((sum, item) => sum + (item.total || 0), 0).toFixed(2)} zł
-                  </span>
+                  <span className="font-semibold">{subtotal.toFixed(2)} zł</span>
                 </div>
                 <div className="flex justify-between py-1">
                   <span className="text-gray-600">VAT (23%):</span>
-                  <span className="font-semibold">
-                    {(
-                      invoiceItems.reduce((sum, item) => sum + (item.total || 0), 0) * 0.23
-                    ).toFixed(2)}{' '}
-                    zł
-                  </span>
+                  <span className="font-semibold">{vatAmount.toFixed(2)} zł</span>
                 </div>
                 <div className="flex justify-between py-2 border-t border-gray-200 font-semibold text-lg">
                   <span>Total:</span>
-                  <span>
-                    {(
-                      invoiceItems.reduce((sum, item) => sum + (item.total || 0), 0) * 1.23
-                    ).toFixed(2)}{' '}
-                    zł
-                  </span>
+                  <span>{total.toFixed(2)} zł</span>
                 </div>
               </div>
             </div>
           </div>
         )}
+
+        {error && <div className="mb-4 text-red-600 text-sm">{error}</div>}
 
         <div className="flex justify-end space-x-3">
           <button
@@ -192,10 +200,10 @@ export function InvoiceCreateModal({
           </button>
           <button
             onClick={onSaveInvoice}
-            disabled={invoiceItems.length === 0}
+            disabled={invoiceItems.length === 0 || isSaving}
             className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Create Invoice
+            {isSaving ? 'Creating...' : 'Create Invoice'}
           </button>
         </div>
       </div>
