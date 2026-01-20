@@ -1,6 +1,5 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
 import Header from '../../components/dashboard/Header';
 import StatsCard from '../../components/dashboard/StatsCard';
 import ClientsList from './clients/ClientsList';
@@ -18,7 +17,6 @@ import { useInvoiceCreate } from '../../lib/invoices/useInvoiceCreate';
 import { useInvoicePreview } from '../../lib/invoices/useInvoicePreview';
 
 export function Dashboard() {
-  const { status } = useSession();
   const { clients, setClients, isLoading: clientsLoading, error: clientsError } = useClientsQuery();
   const editModal = useClientEditModal();
   const editForm = useClientForm(editModal.client ?? undefined);
@@ -52,7 +50,7 @@ export function Dashboard() {
   });
   const invoicePreview = useInvoicePreview();
 
-  if (status === 'loading' || clientsLoading || invoicesLoading) {
+  if (clientsLoading || invoicesLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50">
         <div className="text-center">
