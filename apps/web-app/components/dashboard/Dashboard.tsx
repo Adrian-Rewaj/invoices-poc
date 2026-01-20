@@ -1,341 +1,132 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { signOut, useSession } from 'next-auth/react';
-import { Client, ClientChangeLog, NewClient } from '../../types/client';
-import { Invoice } from '../../types/invoice';
+import { useSession } from 'next-auth/react';
 import Header from '../../components/dashboard/Header';
 import StatsCard from '../../components/dashboard/StatsCard';
-import ClientsList from '../../components/dashboard/ClientsList';
-import { InvoicesList } from '../../components/dashboard/InvoicesList';
-import { InvoiceItem } from '../../types/invoice-item';
-import { InvoiceCreateModal } from '../../components/dashboard/InvoiceCreateModal';
-import { ClientEditModal } from '../../components/dashboard/ClientEditModal';
-import { InvoicePreviewModal } from '../../components/dashboard/InvoicePreviewModal';
+import ClientsList from './clients/ClientsList';
+import { ClientEditModal } from './clients/ClientEditModal';
+import InvoicesList from './invoices/InvoicesList';
+import InvoiceCreateModal from './invoices/InvoiceCreateModal';
+import InvoicePreviewModal from './invoices/InvoicePreviewModal';
+import { useClientsQuery } from '../../lib/clients/useClientsQuery';
+import { useClientEditModal } from '../../lib/clients/useClientEditModal';
+import { useClientForm } from '../../lib/clients/useClientForm';
+import { useClientChangeLogs } from '../../lib/clients/useClientChangeLogs';
+import { useUpdateClient } from '../../lib/clients/useUpdateClient';
+import { useInvoicesQuery } from '../../lib/invoices/useInvoicesQuery';
+import { useInvoiceCreate } from '../../lib/invoices/useInvoiceCreate';
+import { useInvoicePreview } from '../../lib/invoices/useInvoicePreview';
 
 export function Dashboard() {
-  const [clients, setClients] = useState<Client[]>([]);
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [showAddClient, setShowAddClient] = useState<boolean>(false);
-  const [newClient, setNewClient] = useState<NewClient>({ name: '', email: '', nip: '' });
-  const [editClientId, setEditClientId] = useState<number | null>(null);
-  const [editClient, setEditClient] = useState<Client | null>(null);
-  const [editForm, setEditForm] = useState<NewClient>({ name: '', email: '', nip: '' });
-  const [editLoading, setEditLoading] = useState<boolean>(false);
-  const [editError, setEditError] = useState<string>('');
-  const [showEditClientModal, setShowEditClientModal] = useState(false);
-  const [changeLogs, setChangeLogs] = useState<ClientChangeLog[]>([]);
-  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
-  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
-  const [showInvoiceCreateModal, setShowInvoiceCreateModal] = useState(false);
-  const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([]);
-  const [editingClientId, setEditingClientId] = useState<number | null>(null);
-  const router = useRouter();
-  const { data: session, status } = useSession();
+  const { status } = useSession();
+  const { clients, setClients, isLoading: clientsLoading, error: clientsError } = useClientsQuery();
+  const editModal = useClientEditModal();
+  const editForm = useClientForm(editModal.client ?? undefined);
+  const { logs: changeLogs } = useClientChangeLogs(editModal.client?.id);
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login');
-    }
+  const {
+    updateClient,
+    loading: mutationLoading,
+    error: mutationError,
+  } = useUpdateClient({
+    onClientUpdated: (client) =>
+      setClients((prev) => prev.map((c) => (c.id === client.id ? client : c))),
+  });
 
-    fetchData();
-  }, [status, router]);
-
-  const fetchData = async () => {
-    try {
-      const [clientsRes, invoicesRes] = await Promise.all([
-        fetch('/api/clients'),
-        fetch('/api/invoices'),
-      ]);
-
-      if (clientsRes.ok) {
-        const clientsData = await clientsRes.json();
-        setClients(clientsData);
-      }
-
-      if (invoicesRes.ok) {
-        const invoicesData = await invoicesRes.json();
-        setInvoices(invoicesData);
-      }
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    } finally {
-      setLoading(false);
-    }
+  const handleEditClientSubmit = async () => {
+    if (!editModal.client) return;
+    await updateClient(editModal.client.id, editForm.form);
+    editModal.close();
   };
 
-  const handleAddClient = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const response = await fetch('/api/clients', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newClient),
-      });
+  const handleEditClient = (client: any) => editModal.open(client);
 
-      if (response.ok) {
-        const newClientData = await response.json();
-        setClients([newClientData, ...clients]);
-        setNewClient({ name: '', email: '', nip: '' });
-        setShowAddClient(false);
-      } else if (response.status === 401) {
-        router.push('/login');
-      } else {
-        const errorData = await response.json();
-        console.error('Error adding client:', errorData.error);
-      }
-    } catch (error) {
-      console.error('Error adding client:', error);
-    }
-  };
+  const {
+    invoices,
+    setInvoices,
+    isLoading: invoicesLoading,
+    error: invoicesError,
+  } = useInvoicesQuery();
+  const invoiceCreate = useInvoiceCreate({
+    onInvoiceCreated: (inv) => setInvoices([inv, ...invoices]),
+  });
+  const invoicePreview = useInvoicePreview();
 
-  const handleCreateInvoice = async (clientId: number) => {
-    // Sample invoice items
-    const sampleItems = [
-      {
-        name: 'Consulting Service',
-        quantity: 1,
-        unitPrice: 500.0,
-        total: 500.0,
-        description: 'IT consulting services',
-      },
-      {
-        name: 'Subscription',
-        quantity: 1,
-        unitPrice: 50.0,
-        total: 50.0,
-        description: 'Monthly subscription',
-      },
-    ];
-
-    setInvoiceItems(sampleItems);
-    setEditingClientId(clientId);
-    setShowInvoiceCreateModal(true);
-  };
-
-  const handleEditClick = async (client: Client) => {
-    setEditClientId(client.id);
-    setEditClient(client);
-    setEditForm({ name: client.name, email: client.email, nip: client.nip });
-    setShowEditClientModal(true);
-    setEditError('');
-    setEditLoading(false);
-
-    // get changes history
-    try {
-      const res = await fetch(`/api/clients/${client.id}/history`);
-      if (res.ok) {
-        const logs = await res.json();
-        setChangeLogs(logs);
-      } else {
-        setChangeLogs([]);
-      }
-    } catch (error) {
-      console.error('Error fetching history:', error);
-      setChangeLogs([]);
-    }
-  };
-
-  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEditForm({ ...editForm, [e.target.name]: e.target.value });
-  };
-
-  const handleEditSave = async () => {
-    if (!editClientId) return;
-    setEditLoading(true);
-    setEditError('');
-    try {
-      const res = await fetch(`/api/clients/${editClientId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(editForm),
-      });
-      if (res.ok) {
-        const updated = await res.json();
-        setClients((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
-        setShowEditClientModal(false);
-      } else if (res.status === 401) {
-        router.push('/login');
-      } else {
-        const data = await res.json();
-        setEditError(data.error || 'Edit error');
-      }
-    } catch (e) {
-      setEditError('Network error');
-    } finally {
-      setEditLoading(false);
-    }
-  };
-
-  const handleLogout = () => {
-    signOut({ redirect: false });
-    router.push('/login');
-  };
-
-  const handleInvoicePreview = (invoice: Invoice) => {
-    setSelectedInvoice(invoice);
-    setShowInvoiceModal(true);
-  };
-
-  const handleDownloadPDF = async (invoice: Invoice) => {
-    try {
-      const response = await fetch(`/api/invoices/${invoice.id}/pdf`);
-
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `invoice-${invoice.invoiceNumber}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-      } else {
-        const errorData = await response.json();
-        alert(`PDF download error: ${errorData.error}`);
-      }
-    } catch (error) {
-      console.error('Error downloading PDF:', error);
-      alert('PDF download error');
-    }
-  };
-
-  const handleAddInvoiceItem = () => {
-    const newItem = {
-      name: '',
-      quantity: 1,
-      unitPrice: 0,
-      total: 0,
-      description: '',
-    };
-    setInvoiceItems([...invoiceItems, newItem]);
-  };
-
-  const handleRemoveInvoiceItem = (index: number) => {
-    const newItems = invoiceItems.filter((_, i) => i !== index);
-    setInvoiceItems(newItems);
-  };
-
-  const handleUpdateInvoiceItem = (index: number, field: string, value: string | number) => {
-    const newItems = [...invoiceItems];
-    newItems[index] = { ...newItems[index], [field]: value };
-
-    // total price
-    if (field === 'quantity' || field === 'unitPrice') {
-      newItems[index].total = newItems[index].quantity * newItems[index].unitPrice;
-    }
-
-    setInvoiceItems(newItems);
-  };
-
-  const handleSaveInvoice = async () => {
-    if (!editingClientId) return;
-
-    try {
-      const response = await fetch('/api/invoices', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          clientId: editingClientId,
-          items: invoiceItems,
-        }),
-      });
-
-      if (response.ok) {
-        const newInvoice = await response.json();
-        setInvoices([newInvoice, ...invoices]);
-        setShowInvoiceCreateModal(false);
-        setInvoiceItems([]);
-        setEditingClientId(null);
-      } else {
-        const errorData = await response.json();
-        console.error('Error creating invoice:', errorData.error);
-        alert(`Invoice creation error: ${errorData.error}`);
-      }
-    } catch (error) {
-      console.error('Error creating invoice:', error);
-      alert('Invoice creation error');
-    }
-  };
-
-  if (loading) {
+  if (status === 'loading' || clientsLoading || invoicesLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Ładowanie...</p>
+          <p className="text-gray-600">Loading...</p>
         </div>
       </div>
     );
   }
+
   return (
-    <>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       <Header />
-      {/* Main Content */}
+
+      {(clientsError || mutationError || invoicesError) && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+          <div className="bg-red-50 border-l-4 border-red-400 p-4">
+            <p className="text-red-700">{clientsError || mutationError || invoicesError}</p>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-7xl mx-auto py-4 sm:py-8 px-4 sm:px-6 lg:px-8">
         <StatsCard clientsNumber={clients.length} invoicesNumber={invoices.length} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mt-6">
           <ClientsList
-            setShowAddClient={setShowAddClient}
-            showAddClient={showAddClient}
-            onAddClient={handleAddClient}
-            newClient={newClient}
-            setNewClient={setNewClient}
             clients={clients}
-            onEditClick={handleEditClick}
-            onCreateInvoice={handleCreateInvoice}
+            onEditClient={handleEditClient}
+            onCreateInvoice={invoiceCreate.startCreating}
+            onClientAdded={(client) => setClients([client, ...clients])}
           />
           <InvoicesList
             invoices={invoices}
-            onInvoicePreview={handleInvoicePreview}
-            onDownloadPDF={handleDownloadPDF}
+            onInvoicePreview={invoicePreview.openPreview}
+            onDownloadPDF={invoicePreview.downloadPDF}
           />
         </div>
       </div>
 
-      {/* create Invoice modal */}
-      {showInvoiceCreateModal && (
+      {invoiceCreate.showModal && (
         <InvoiceCreateModal
-          setShowInvoiceEditModal={setShowInvoiceCreateModal}
-          onAddInvoiceItem={handleAddInvoiceItem}
-          invoiceItems={invoiceItems}
-          onRemoveInvoiceItem={handleRemoveInvoiceItem}
-          onUpdateInvoiceItem={handleUpdateInvoiceItem}
-          onSaveInvoice={handleSaveInvoice}
+          setShowInvoiceEditModal={invoiceCreate.setShowModal}
+          invoiceItems={invoiceCreate.invoiceItems}
+          onAddInvoiceItem={invoiceCreate.addItem}
+          onRemoveInvoiceItem={invoiceCreate.removeItem}
+          onUpdateInvoiceItem={invoiceCreate.updateItem}
+          onSaveInvoice={invoiceCreate.saveInvoice}
+          isSaving={invoiceCreate.isSaving}
+          error={invoiceCreate.error}
         />
       )}
 
-      {/* edit client modal */}
-      {showEditClientModal && editClient && (
+      {editModal.isOpen && editModal.client && (
         <ClientEditModal
-          setShowEditClientModal={setShowEditClientModal}
-          editForm={editForm}
-          onEditChange={handleEditChange}
-          editError={editError}
-          onEditSave={handleEditSave}
-          editLoading={editLoading}
+          setShowEditClientModal={editModal.close}
+          editForm={editForm.form}
+          onEditChange={editForm.handleChange}
+          editError={mutationError}
+          onEditSave={handleEditClientSubmit}
+          editLoading={mutationLoading}
           changeLogs={changeLogs}
         />
       )}
 
-      {/* invoice preview modal*/}
-      {showInvoiceModal && selectedInvoice && (
+      {invoicePreview.showModal && invoicePreview.selectedInvoice && (
         <InvoicePreviewModal
-          setShowInvoiceModal={setShowInvoiceModal}
-          selectedInvoice={selectedInvoice}
-          handleDownloadPDF={handleDownloadPDF}
+          setShowInvoiceModal={invoicePreview.setShowModal}
+          selectedInvoice={invoicePreview.selectedInvoice}
+          handleDownloadPDF={invoicePreview.downloadPDF}
+          isDownloading={invoicePreview.isDownloading}
+          error={invoicePreview.error}
         />
       )}
-    </>
+    </div>
   );
 }

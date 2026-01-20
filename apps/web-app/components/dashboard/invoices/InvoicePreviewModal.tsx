@@ -1,15 +1,20 @@
-import { Invoice } from '../../types/invoice';
+import { Invoice } from '../../../types/invoice';
+import { InvoiceItem } from '../../../types/invoice-item';
 
 interface InvoicePreviewModalProps {
   setShowInvoiceModal: (show: boolean) => void;
   selectedInvoice: Invoice;
   handleDownloadPDF: (invoice: Invoice) => void;
+  isDownloading: boolean;
+  error: string;
 }
 
-export function InvoicePreviewModal({
+export default function InvoicePreviewModal({
   setShowInvoiceModal,
   selectedInvoice,
   handleDownloadPDF,
+  isDownloading,
+  error,
 }: InvoicePreviewModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
@@ -96,7 +101,7 @@ export function InvoicePreviewModal({
                   </tr>
                 </thead>
                 <tbody>
-                  {selectedInvoice.data.items.map((item: any, index: number) => (
+                  {selectedInvoice.data.items.map((item: InvoiceItem, index: number) => (
                     <tr key={index} className="border-t border-gray-200">
                       <td className="px-4 py-2 text-gray-700">{item.name}</td>
                       <td className="px-4 py-2 text-right text-gray-600">{item.quantity}</td>
@@ -158,12 +163,15 @@ export function InvoicePreviewModal({
           </div>
         </div>
 
+        {error && <div className="mb-4 text-red-600 text-sm">{error}</div>}
+
         <div className="flex justify-end space-x-3">
           <button
             onClick={() => handleDownloadPDF(selectedInvoice)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={isDownloading}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
           >
-            Download PDF
+            {isDownloading ? 'Downloading...' : 'Download PDF'}
           </button>
           <button
             onClick={() => setShowInvoiceModal(false)}
